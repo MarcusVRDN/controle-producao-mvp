@@ -46,9 +46,9 @@ codigo                  String
 clienteId               Int 
 descricao               String
 material                String
-tratamentoSuperficial   String
-tratamentoTermico       String
-terceirizacao           String
+tratamentoSuperficial   String?
+tratamentoTermico       String?
+terceirizacao           String?
 observacao              String?
 ordensServico           OrdemServico[]
 cliente                 Cliente         @relation(fields: [clienteId], references: [id])
