@@ -1,26 +1,25 @@
-import { create, findAll, findById, remove, update } from "../controllers/peca.controller.js";
 import { Router } from "express";
+import { create , findAll, findById, remove, update } from "../controllers/pedido.controller.js";
 
 const router = Router();
 
-router.post(
+router.post (
     "/", create
-);
+)
 
-router.get(
+router.get (
     "/", findAll
 );
 
-router.get(
+router.get (
     "/:id", findById
-);
-
-router.put(
-    "/:id", update
-);
-
-router.delete(
-    "/:id", remove
 )
 
+router.put (
+    "/:id", update
+)
+
+router.delete (
+    "/:id", remove
+)
 export default router;
