@@ -59,7 +59,9 @@ export async function remove(req: Request, res: Response) {
     try {
         const id = Number(req.params.id)
 
-        const peca = await pecaService.delete(id)
+        await pecaService.delete(id)
+
+        return res.status(204).send();
     } catch (error) {
         console.error(error);
         return res.status(400).json({
