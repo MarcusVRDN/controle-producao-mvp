@@ -21,7 +21,7 @@ export const pedidoService = {
             throw new Error ("Cliente não encontrado");
         };
 
-        if (!data.codigo) {
+        if (!data.codigo?.trim()) {
             throw new Error ("Código é obrigatório");
         };
         return pedidoRepository.create(data);

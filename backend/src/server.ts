@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import clienteRoutes from "./routes/cliente.routes.js"
 import pecaRoutes from "./routes/peca.routes.js"
 import pedidoRoutes from "./routes/pedido.routes.js"
+import ordemServicoRoutes from "./routes/ordemServico.routes.js"
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/clientes", clienteRoutes)
 app.use("/pecas", pecaRoutes)
 app.use("/pedidos", pedidoRoutes)
+app.use("/ordensServico", ordemServicoRoutes)
 
 app.get("/", (req, res) => {
   res.json({

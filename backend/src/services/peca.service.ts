@@ -21,7 +21,6 @@ tratamentoSuperficial?: string;
 tratamentoTermico?: string;
 terceirizacao?: string;
 observacao?: string;
-ativo?: boolean;
 }
 
 export const pecaService = {
@@ -32,7 +31,7 @@ export const pecaService = {
             throw new Error("Cliente não encontrado");
         }
 
-        if (!data.codigo) {
+        if (!data.codigo?.trim()) {
             throw new Error("Código é obrigatório")
         }
 
