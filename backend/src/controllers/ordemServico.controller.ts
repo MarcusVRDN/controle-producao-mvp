@@ -4,6 +4,8 @@ import { ordemServicoService } from "../services/ordemServicoService.js";
 export async function create(req: Request, res: Response) {
     try {
         const ordemServico = await ordemServicoService.create(req.body);
+
+        return res.status(201).json(ordemServico);
     } catch (error) {
         console.error(error);
     return res.status(400).json({
