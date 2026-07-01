@@ -1,7 +1,6 @@
 import { prisma } from "../config/prisma.js";
-import { findById } from "../controllers/cliente.controller.js";
 
-type createOrdemServicoData = {
+type CreateOrdemServicoData = {
     numero: number
     pedidoId: number
     pecaId: number
@@ -14,7 +13,7 @@ type createOrdemServicoData = {
     observacao?: string
 }
 
-type updateOrdemServicoData = {
+type UpdateOrdemServicoData = {
     numero?: number
     pedidoId?: number
     pecaId?: number
@@ -28,7 +27,7 @@ type updateOrdemServicoData = {
 }
 
 export const ordemServicoRepository = {
-    create(data: createOrdemServicoData) {
+    create(data: CreateOrdemServicoData) {
         return prisma.ordemServico.create({data});
     },
 
@@ -46,7 +45,7 @@ export const ordemServicoRepository = {
         });
     },
 
-    update(id: number, data: updateOrdemServicoData) {
+    update(id: number, data: UpdateOrdemServicoData) {
         return prisma.ordemServico.update({
             where: {id},
             data

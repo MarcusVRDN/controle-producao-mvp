@@ -2,7 +2,7 @@ import { ordemServicoRepository } from "../repositories/ordemServico.repository.
 import { pedidoRepository } from "../repositories/pedido.repository.js";
 import { pecaRepository } from "../repositories/peca.repository.js";
 
-type createOrdemServicoData = {
+type CreateOrdemServicoData = {
     numero: number
     pedidoId: number
     pecaId: number
@@ -15,7 +15,7 @@ type createOrdemServicoData = {
     observacao?: string
 }
 
-type updateOrdemServicoData = {
+type UpdateOrdemServicoData = {
     numero?: number
     pedidoId?: number
     pecaId?: number
@@ -29,7 +29,7 @@ type updateOrdemServicoData = {
 }
 
 export const ordemServicoService = {
-   async create(data: createOrdemServicoData) {
+   async create(data: CreateOrdemServicoData) {
        if (!data.numero) {
            throw new Error("Número da ordem de serviço é obrigatório");
        }
@@ -61,7 +61,7 @@ export const ordemServicoService = {
         return ordemServico;
     },
 
-    async update(id: number, data:updateOrdemServicoData) {
+    async update(id: number, data:UpdateOrdemServicoData) {
         await this.findById(id);
 
         return ordemServicoRepository.update(id, data)
