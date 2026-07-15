@@ -8,7 +8,7 @@ type LayoutProps = {
 
 function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-slate-800">
       <Navbar />
 
       <div className="flex min-h-[calc(100vh-4rem)]">
