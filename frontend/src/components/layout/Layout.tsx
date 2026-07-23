@@ -1,12 +1,9 @@
-import type { ReactNode } from "react"
+import { Outlet } from "react-router-dom"
 import Navbar from "./Navbar"
 import Sidebar from "./Sidebar"
 
-type LayoutProps = {
-  children: ReactNode
-}
 
-function Layout({ children }: LayoutProps) {
+function Layout() {
   return (
     <div className="min-h-screen bg-slate-800">
       <Navbar />
@@ -15,7 +12,7 @@ function Layout({ children }: LayoutProps) {
         <Sidebar />
 
         <main className="flex-1 p-8">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>
