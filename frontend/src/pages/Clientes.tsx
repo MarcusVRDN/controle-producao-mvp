@@ -1,4 +1,6 @@
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 const clientes = [
   {
@@ -28,12 +30,16 @@ const clientes = [
 ];
 
 function Clientes() {
+  const navigate = useNavigate();
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
         <h1 className="text-lg font-semibold text-white">Clientes</h1>
 
-        <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+        <button 
+        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+        onClick={() => navigate("/clientes/novo")}
+        >  
           <Plus size={18} />
           Adicionar Cliente
         </button>
@@ -96,7 +102,7 @@ function Clientes() {
                     </button>
 
                     <button
-                      className="rounded-md p-2 text-red-600 transition hover:bg-red-100"
+                      className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-white transition duration-200 hover:bg-slate-700"
                       title="Excluir cliente"
                     >
                       <Trash2 size={17} />
