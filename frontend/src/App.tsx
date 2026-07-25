@@ -4,6 +4,7 @@ import Clientes from "./pages/Clientes";
 import Pecas from "./pages/Pecas";
 import Pedidos from "./pages/Pedidos";
 import OrdensServico from "./pages/OrdensServico";
+import ClienteForm from "./pages/ClienteForm"
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/pecas" element={<Pecas />} />
         <Route path="/pedidos" element={<Pedidos/>} />
         <Route path="/ordens-servico" element={<OrdensServico/>}/>
+        <Route path="/clientes/novo" element={<ClienteForm />} />
       </Route>
     </Routes>
   );
