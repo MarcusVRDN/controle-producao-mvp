@@ -1,4 +1,5 @@
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ordensServico = [
   {
@@ -34,12 +35,14 @@ const ordensServico = [
 ];
 
 function OrdensServico() {
+  const navigate = useNavigate()
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
         <h1 className="text-lg font-semibold text-white">Ordens de Serviço</h1>
 
-        <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+        <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+        onClick={() => navigate ("/ordem-servico/novo")}>
           <Plus size={18} />
           Adicionar Ordem de Serviço
         </button>
