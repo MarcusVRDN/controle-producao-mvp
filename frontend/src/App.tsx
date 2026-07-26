@@ -6,6 +6,7 @@ import Pedidos from "./pages/Pedidos";
 import OrdensServico from "./pages/OrdensServico";
 import ClienteForm from "./pages/ClienteForm"
 import PecaForm from "./pages/PecaForm";
+import PedidoForm from "./pages/pedidoForm";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/ordens-servico" element={<OrdensServico/>}/>
         <Route path="/clientes/novo" element={<ClienteForm />} />
         <Route path="/pecas/novo" element={<PecaForm />} />
+        <Route path="/pedidos/novo" element={<PedidoForm />} />
       </Route>
     </Routes>
   );
