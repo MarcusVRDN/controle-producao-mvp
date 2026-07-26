@@ -1,8 +1,27 @@
 import { useNavigate } from "react-router-dom";
+import { useState, type SyntheticEvent } from "react";
 
 function ClienteForm() {
 
+const [nome, setNome] = useState ('');
+const [cnpj, setCnpj] = useState(''); 
+const [contato, setContato] = useState('');
+const [telefone, setTelefone] = useState('');
 const navigate = useNavigate();
+
+async function handleSubmit(
+  event: SyntheticEvent<HTMLFormElement>
+) {
+  event.preventDefault();
+
+  const cliente = {
+    nome,
+    cnpj,
+    contato,
+    telefone
+  }
+  console.log(cliente)
+}
 
   return (
     <section className="flex flex-col gap-6">
@@ -16,7 +35,8 @@ const navigate = useNavigate();
         </p>
       </div>
 
-      <form className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md">
+      <form className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md"
+      onSubmit={handleSubmit}>
         <div className="flex flex-col gap-2">
           <label
             htmlFor="nome"
@@ -29,7 +49,10 @@ const navigate = useNavigate();
             id="nome"
             name="nome"
             type="text"
+            value={nome}
+            required
             placeholder="Digite o nome do cliente..."
+            onChange={(event)=> setNome(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -46,7 +69,10 @@ const navigate = useNavigate();
             id="cnpj"
             name="cnpj"
             type="text"
+            value={cnpj}
+            required
             placeholder="Digite o CNPJ..."
+            onChange={(event) => setCnpj(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -64,7 +90,9 @@ const navigate = useNavigate();
               id="contato"
               name="contato"
               type="text"
+              value={contato}
               placeholder="Digite o nome do contato..."
+              onChange={(event) => setContato(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -81,7 +109,9 @@ const navigate = useNavigate();
               id="telefone"
               name="telefone"
               type="text"
+              value={telefone}
               placeholder="Digite o telefone..."
+              onChange={(event) => setTelefone(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
