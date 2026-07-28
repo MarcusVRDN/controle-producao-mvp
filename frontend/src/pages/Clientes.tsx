@@ -90,6 +90,7 @@ function Clientes() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar cliente"
+                      onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
                     >
                       <Pencil size={17} />
                     </button>
