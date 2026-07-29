@@ -1,48 +1,63 @@
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
-const pecas = [
-  {
-    id: 1,
-    codigo: "13857",
-    cliente: "Zuiko",
-    descricao: "Polia",
-    material: "Aço 1020",
-    tratamentoTermico: "Tempera",
-    tratamentoSuperficial: "N/A",
-    terceirizacao: "N/A",
-  },
-  {
-    id: 2,
-    codigo: "432951",
-    cliente: "Avibras",
-    descricao: "Caixa",
-    material: "Aço H13",
-    tratamentoTermico: "Tempera",
-    tratamentoSuperficial: "Oxidação",
-    terceirizacao: "Solda",
-  },
-  {
-    id: 3,
-    codigo: "482957",
-    cliente: "FKB",
-    descricao: "Eixo",
-    material: "Aço 4340",
-    tratamentoTermico: "Tempera",
-    tratamentoSuperficial: "N/A",
-    terceirizacao: "N/A",
-  },
-];
+type Cliente = {
+  id: number;
+  nome: string;
+};
+
+type Peca = {
+  id: number;
+  codigo: string;
+  clienteId: number;
+  descricao: string;
+  material: string;
+  tratamentoTermico: string;
+  tratamentoSuperficial: string;
+  terceirizacao: string;
+  observacao: string;
+};
 
 function Pecas() {
-  const navigate = useNavigate()
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+
+  useEffect(() => {
+    async function buscarClientes() {
+      const response = await fetch("http://localhost:3001/clientes");
+      if (response.ok) {
+        const clientesApi = await response.json();
+        setClientes(clientesApi);
+      } else {
+        console.error("Erro ao buscar clientes");
+      }
+    }
+    buscarClientes();
+  }, []);
+  const [pecas, setPecas] = useState<Peca[]>([]);
+  useEffect(() => {
+    async function buscarPecas() {
+      const response = await fetch("http://localhost:3001/pecas");
+      if (response.ok) {
+        const pecasApi = await response.json();
+        setPecas(pecasApi);
+      } else {
+        console.error("Erro ao buscar peças");
+      }
+    }
+    buscarPecas();
+  }, []);
+
+  const navigate = useNavigate();
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
         <h1 className="text-lg font-semibold text-white">Peças</h1>
 
-        <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-        onClick={() => navigate("/pecas/novo")}>
+        <button
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+          onClick={() => navigate("/pecas/novo")}
+        >
           <Plus size={18} />
           Adicionar Peça
         </button>
@@ -74,7 +89,8 @@ function Pecas() {
                 <td className="border-b border-slate-400 p-3">{peca.codigo}</td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {peca.cliente}
+                  {clientes.find((cliente) => cliente.id === peca.clienteId)
+                    ?.nome ?? "Cliente não encontrado"}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
