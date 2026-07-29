@@ -1,45 +1,41 @@
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
-
-const clientes = [
-  {
-    id: 1,
-    nome: "Avibras",
-    cnpj: "54.825.471/887",
-    contato: "Mauricio",
-    telefone: "(12) 98832-0156",
-    status: "Ativo",
-  },
-  {
-    id: 2,
-    nome: "GD DO BRASIL",
-    cnpj: "22.812.756/3215",
-    contato: "Lucas",
-    telefone: "(12) 97458-9863",
-    status: "Ativo",
-  },
-  {
-    id: 3,
-    nome: "KHS",
-    cnpj: "14.806.978/58",
-    contato: "Sergio",
-    telefone: "(12) 94578-3659",
-    status: "Ativo",
-  },
-];
+type Cliente = {
+    id: number;
+    nome: string;
+    cnpj: string;
+    contato?: string;
+    telefone?: string;
+    ativo: boolean;
+  };
 
 function Clientes() {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+
+  useEffect(() => {
+    async function buscarClientes() {
+      const response = await fetch("http://localhost:3001/clientes");
+      if (response.ok) {
+        const clientesApi = await response.json();
+        setClientes(clientesApi);
+      } else{
+        console.error("Erro ao buscar clientes");
+      }
+    }
+    buscarClientes();
+  },[]);
   const navigate = useNavigate();
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
         <h1 className="text-lg font-semibold text-white">Clientes</h1>
 
-        <button 
-        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-        onClick={() => navigate("/clientes/novo")}
-        >  
+        <button
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+          onClick={() => navigate("/clientes/novo")}
+        >
           <Plus size={18} />
           Adicionar Cliente
         </button>
@@ -68,10 +64,7 @@ function Clientes() {
 
           <tbody>
             {clientes.map((cliente) => (
-              <tr
-                key={cliente.id}
-                className="transition hover:bg-slate-300"
-              >
+              <tr key={cliente.id} className="transition hover:bg-slate-300">
                 <td className="border-b border-slate-400 p-3">
                   {cliente.nome}
                 </td>
@@ -89,7 +82,7 @@ function Clientes() {
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {cliente.status}
+                  {cliente.ativo ? "Ativo" : "Inativo"}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
@@ -97,6 +90,7 @@ function Clientes() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar cliente"
+                      onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
                     >
                       <Pencil size={17} />
                     </button>

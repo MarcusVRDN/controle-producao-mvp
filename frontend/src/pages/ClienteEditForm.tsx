@@ -1,12 +1,31 @@
-import { useNavigate } from "react-router-dom";
-import { useState, type SyntheticEvent } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState, type SyntheticEvent, useEffect } from "react";
 
-function ClienteForm() {
+function ClienteEditForm() {
   const [nome, setNome] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [contato, setContato] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [ativo, setAtivo] = useState(true);
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  useEffect(() => {
+    async function buscarCliente() {
+      const response = await fetch(`http://localhost:3001/clientes/${id}`);
+      if (response.ok) {
+        const clienteApi = await response.json();
+        setNome(clienteApi.nome);
+        setCnpj(clienteApi.cnpj);
+        setContato(clienteApi.contato ?? "");
+        setTelefone(clienteApi.telefone ?? "");
+        setAtivo(clienteApi.ativo);
+      } else {
+        console.error("Erro ao buscar cliente");
+      }
+    }
+    buscarCliente();
+  }, [id]);
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -16,28 +35,28 @@ function ClienteForm() {
       cnpj,
       contato,
       telefone,
+      ativo,
     };
-    const response = await fetch("http://localhost:3001/clientes", {
-      method: "POST",
+
+    const response = await fetch(`http://localhost:3001/clientes/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(cliente),
     });
-    if (response.status === 201) {
-      const obj = await response.json();
-      console.log(obj);
+    if (response.ok) {
       navigate("/clientes");
+    } else {
+      console.error("Erro ao atualizar cliente");
     }
   }
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-white">Cadastrar Cliente</h1>
+        <h1 className="text-xl font-semibold text-white">Editar Cliente</h1>
 
-        <p className="text-sm text-slate-300">
-          Preencha os dados abaixo para criar um novo cliente.
-        </p>
+        <p className="text-sm text-slate-300">Edite os campos desejados</p>
       </div>
 
       <form
@@ -55,7 +74,6 @@ function ClienteForm() {
             type="text"
             value={nome}
             required
-            placeholder="Digite o nome do cliente..."
             onChange={(event) => setNome(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
@@ -72,7 +90,6 @@ function ClienteForm() {
             type="text"
             value={cnpj}
             required
-            placeholder="Digite o CNPJ..."
             onChange={(event) => setCnpj(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
@@ -92,7 +109,6 @@ function ClienteForm() {
               name="contato"
               type="text"
               value={contato}
-              placeholder="Digite o nome do contato..."
               onChange={(event) => setContato(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
@@ -111,10 +127,26 @@ function ClienteForm() {
               name="telefone"
               type="text"
               value={telefone}
-              placeholder="Digite o telefone..."
               onChange={(event) => setTelefone(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="ativo"
+              name="ativo"
+              type="checkbox"
+              checked={ativo}
+              onChange={(event) => setAtivo(event.target.checked)}
+              className="h-4 w-4"
+            />
+
+            <label
+              htmlFor="ativo"
+              className="text-sm font-medium text-slate-700"
+            >
+              Ativo
+            </label>
           </div>
         </div>
 
@@ -131,7 +163,7 @@ function ClienteForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
-            title="Salvar cliente"
+            title="Salvar alterações"
           >
             Salvar
           </button>
@@ -141,4 +173,4 @@ function ClienteForm() {
   );
 }
 
-export default ClienteForm;
+export default ClienteEditForm;
