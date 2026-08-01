@@ -106,6 +106,7 @@ function Pecas() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar peça"
+                      onClick={() => navigate(`/pecas/editar/${peca.id}`)}
                     >
                       <Pencil size={17} />
                     </button>
