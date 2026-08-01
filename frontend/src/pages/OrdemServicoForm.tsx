@@ -28,7 +28,7 @@ type Pedido = {
 
 function OrdemServicoForm() {
   const navigate = useNavigate();
-  const [numero, setNumero] = useState("");
+  const [numero, setNumero] = useState(0);
   const [pedidoId, setPedidoId] = useState("");
   const [pecaId, setPecaId] = useState("");
   const [horasUnitarias, setHorasUnitarias] = useState(0);
@@ -76,8 +76,10 @@ function OrdemServicoForm() {
       horasUnitarias,
       quantidade,
       horasTotais,
-      setores,
-      dataEntregaSolicitada,
+      setores: setores.join(", "),
+      dataEntregaSolicitada: new Date(
+        `${dataEntregaSolicitada}T00:00:00`,
+      ).toISOString(),
       observacao,
     };
     const response = await fetch("http://localhost:3001/ordensServico", {
@@ -90,7 +92,10 @@ function OrdemServicoForm() {
     if (response.ok) {
       const obj = await response.json();
       console.log(obj);
-      navigate("/ordensServico");
+      navigate("/ordens-servico");
+    } else {
+      const erro = await response.json();
+      console.error(erro);
     }
   }
 
@@ -122,8 +127,10 @@ function OrdemServicoForm() {
         </p>
       </div>
 
-      <form className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md"
-      onSubmit={onHandleSubmit}>
+      <form
+        className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md"
+        onSubmit={onHandleSubmit}
+      >
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2">
             <label
@@ -136,9 +143,9 @@ function OrdemServicoForm() {
             <input
               id="numero"
               name="numero"
-              type="text"
+              type="number"
               value={numero}
-              onChange={(event) => setNumero(event.target.value)}
+              onChange={(e) => setNumero(Number(e.target.value))}
               required
               placeholder="Digite o número da O.S...."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"

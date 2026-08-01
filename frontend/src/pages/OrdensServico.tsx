@@ -1,48 +1,101 @@
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ordensServico = [
-  {
-    id: 1,
-    numero: "3789",
-    cliente: "Zuiko",
-    pedido: "186215",
-    peca: "125DE45",
-    quantidade: "1",
-    dataEntrega: "12/10/2026",
-    status: "ABERTA",
-  },
-  {
-    id: 2,
-    numero: "3489",
-    cliente: "KHS",
-    pedido: "71AS78",
-    peca: "KHS-0001",
-    quantidade: "4",
-    dataEntrega: "07/10/2026",
-    status: "ABERTA",
-  },
-  {
-    id: 3,
-    numero: "48665",
-    cliente: "FKB",
-    pedido: "2784",
-    peca: "FKB0010",
-    quantidade: "7",
-    dataEntrega: "01/10/2026",
-    status: "FINALIZADA",
-  },
-];
+type Cliente = {
+  id: number;
+  nome: string;
+};
+
+type Peca = {
+  id: number;
+  codigo: string;
+};
+
+type Pedido = {
+  id: number;
+  codigo: string;
+  clienteId: number;
+};
+
+type OrdemServico = {
+  id: number;
+  numero: number;
+  pedidoId: number;
+  pecaId: number;
+  quantidade: number;
+  dataEntregaSolicitada: string;
+  status: string;
+};
 
 function OrdensServico() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+
+  useEffect(() => {
+    async function buscarClientes() {
+      const response = await fetch("http://localhost:3001/clientes");
+      if (response.ok) {
+        const clientesApi = await response.json();
+        setClientes(clientesApi);
+      } else {
+        console.error("Erro ao buscar clientes");
+      }
+    }
+    buscarClientes();
+  }, []);
+
+  const [pecas, setPecas] = useState<Peca[]>([]);
+  useEffect(() => {
+    async function buscarPecas() {
+      const response = await fetch("http://localhost:3001/pecas");
+      if (response.ok) {
+        const pecasApi = await response.json();
+        setPecas(pecasApi);
+      } else {
+        console.error("Erro ao buscar peças");
+      }
+    }
+    buscarPecas();
+  }, []);
+
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  useEffect(() => {
+    async function buscarPedidos() {
+      const response = await fetch("http://localhost:3001/pedidos");
+      if (response.ok) {
+        const pedidosApi = await response.json();
+        setPedidos(pedidosApi);
+      } else {
+        console.error("Erro ao buscar pedidos");
+      }
+    }
+    buscarPedidos();
+  }, []);
+
+  const [ordensServico, setOrdensServico] = useState<OrdemServico[]>([]);
+  useEffect(() => {
+    async function buscarOrdensServico() {
+      const response = await fetch("http://localhost:3001/ordensServico");
+      if (response.ok) {
+        const ordensServicoApi = await response.json();
+        setOrdensServico(ordensServicoApi);
+      } else {
+        console.error("Erro ao buscar ordens de serviço");
+      }
+    }
+    buscarOrdensServico();
+  }, []);
+
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
         <h1 className="text-lg font-semibold text-white">Ordens de Serviço</h1>
 
-        <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-        onClick={() => navigate ("/ordem-servico/novo")}>
+        <button
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+          onClick={() => navigate("/ordem-servico/novo")}
+        >
           <Plus size={18} />
           Adicionar Ordem de Serviço
         </button>
@@ -74,19 +127,32 @@ function OrdensServico() {
 
           <tbody>
             {ordensServico.map((ordemServico) => (
-              <tr key={ordemServico.id} className="transition hover:bg-slate-300">
-                <td className="border-b border-slate-400 p-3">{ordemServico.numero}</td>
-
+              <tr
+                key={ordemServico.id}
+                className="transition hover:bg-slate-300"
+              >
                 <td className="border-b border-slate-400 p-3">
-                  {ordemServico.cliente}
+                  {ordemServico.numero}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {ordemServico.pedido}
+                  {clientes.find(
+                    (cliente) =>
+                      cliente.id ===
+                      pedidos.find(
+                        (pedido) => pedido.id === ordemServico.pedidoId,
+                      )?.clienteId,
+                  )?.nome ?? "Cliente não encontrado"}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {ordemServico.peca}
+                  {pedidos.find((pedido) => pedido.id === ordemServico.pedidoId)
+                    ?.codigo ?? "Pedido não encontrado"}
+                </td>
+
+                <td className="border-b border-slate-400 p-3">
+                  {pecas.find((peca) => peca.id === ordemServico.pecaId)
+                    ?.codigo ?? "Peça não encontrada"}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
@@ -94,7 +160,9 @@ function OrdensServico() {
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {ordemServico.dataEntrega}
+                  {new Date(
+                    ordemServico.dataEntregaSolicitada,
+                  ).toLocaleDateString("pt-BR")}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
