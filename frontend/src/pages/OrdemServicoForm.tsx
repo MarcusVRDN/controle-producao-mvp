@@ -1,11 +1,98 @@
 import { useNavigate } from "react-router-dom";
-import { useState, type ChangeEvent } from "react";
+import {
+  useState,
+  type ChangeEvent,
+  useEffect,
+  type SyntheticEvent,
+} from "react";
+
+type Peca = {
+  id: number;
+  codigo: string;
+  clienteId: number;
+  descricao: string;
+  material: string;
+  tratamentoTermico: string;
+  tratamentoSuperficial: string;
+  terceirizacao: string;
+  observacao: string;
+};
+
+type Pedido = {
+  id: number;
+  codigo: string;
+  clienteId: number;
+  observacao: string;
+  status: string;
+};
 
 function OrdemServicoForm() {
   const navigate = useNavigate();
-
+  const [numero, setNumero] = useState("");
+  const [pedidoId, setPedidoId] = useState("");
+  const [pecaId, setPecaId] = useState("");
   const [horasUnitarias, setHorasUnitarias] = useState(0);
   const [quantidade, setQuantidade] = useState(0);
+  const horasTotais = horasUnitarias * quantidade;
+  const [setores, setSetores] = useState<string[]>([]);
+  const [dataEntregaSolicitada, setDataEntregaSolicitada] = useState("");
+  const [observacao, setObservacao] = useState("");
+
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  useEffect(() => {
+    async function buscarPedidos() {
+      const response = await fetch("http://localhost:3001/pedidos");
+      if (response.ok) {
+        const pedidosApi = await response.json();
+        setPedidos(pedidosApi);
+      } else {
+        console.error("Erro ao buscar pedidos");
+      }
+    }
+    buscarPedidos();
+  }, []);
+
+  const [pecas, setPecas] = useState<Peca[]>([]);
+  useEffect(() => {
+    async function buscarPecas() {
+      const response = await fetch("http://localhost:3001/pecas");
+      if (response.ok) {
+        const pecasApi = await response.json();
+        setPecas(pecasApi);
+      } else {
+        console.error("Erro ao buscar peças");
+      }
+    }
+    buscarPecas();
+  }, []);
+
+  async function onHandleSubmit(event: SyntheticEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const ordemServico = {
+      numero,
+      pedidoId: Number(pedidoId),
+      pecaId: Number(pecaId),
+      horasUnitarias,
+      quantidade,
+      horasTotais,
+      setores,
+      dataEntregaSolicitada,
+      observacao,
+    };
+    const response = await fetch("http://localhost:3001/ordensServico", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(ordemServico),
+    });
+    if (response.ok) {
+      const obj = await response.json();
+      console.log(obj);
+      navigate("/ordensServico");
+    }
+  }
 
   function onHorasUnitariasInputChanged(event: ChangeEvent<HTMLInputElement>) {
     setHorasUnitarias(Number(event.target.value));
@@ -15,9 +102,6 @@ function OrdemServicoForm() {
     setQuantidade(Number(event.target.value));
   }
 
-  const horasTotais = horasUnitarias * quantidade;
-
-  const [setores, setSetores] = useState<string[]>([]);
   function onSetorChange(setor: string) {
     if (setores.includes(setor)) {
       setSetores(setores.filter((item) => item !== setor));
@@ -38,7 +122,8 @@ function OrdemServicoForm() {
         </p>
       </div>
 
-      <form className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md">
+      <form className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md"
+      onSubmit={onHandleSubmit}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2">
             <label
@@ -52,6 +137,9 @@ function OrdemServicoForm() {
               id="numero"
               name="numero"
               type="text"
+              value={numero}
+              onChange={(event) => setNumero(event.target.value)}
+              required
               placeholder="Digite o número da O.S...."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
@@ -68,15 +156,19 @@ function OrdemServicoForm() {
             <select
               id="pedidoId"
               name="pedidoId"
-              defaultValue={""}
+              value={pedidoId}
+              required
+              onChange={(event) => setPedidoId(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
               <option value="" disabled>
                 Escolha o pedido...
               </option>
-              <option value="1">PED001</option>
-              <option value="2">PED002</option>
-              <option value="3">PED003</option>
+              {pedidos.map((pedido) => (
+                <option key={pedido.id} value={pedido.id}>
+                  {pedido.codigo}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex flex-col gap-2">
@@ -90,15 +182,19 @@ function OrdemServicoForm() {
             <select
               id="pecaId"
               name="pecaId"
-              defaultValue={""}
+              value={pecaId}
+              required
+              onChange={(event) => setPecaId(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
               <option value="" disabled>
                 Escolha a peça...
               </option>
-              <option value="1">PEC001</option>
-              <option value="2">PEC002</option>
-              <option value="3">PEC003</option>
+              {pecas.map((peca) => (
+                <option key={peca.id} value={peca.id}>
+                  {peca.codigo}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -118,6 +214,8 @@ function OrdemServicoForm() {
               step="0.01"
               min="0"
               placeholder="Digite o tempo por peça..."
+              required
+              value={horasUnitarias}
               onChange={onHorasUnitariasInputChanged}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
@@ -138,6 +236,8 @@ function OrdemServicoForm() {
               min="1"
               step="1"
               placeholder="Digite a quantidade..."
+              required
+              value={quantidade}
               onChange={onQuantidadeInputChanged}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
@@ -237,6 +337,9 @@ function OrdemServicoForm() {
             name="dataEntregaSolicitada"
             type="date"
             placeholder="Digite a data de entrega solicitada..."
+            value={dataEntregaSolicitada}
+            onChange={(event) => setDataEntregaSolicitada(event.target.value)}
+            required
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -253,6 +356,8 @@ function OrdemServicoForm() {
             name="observacao"
             rows={4}
             placeholder="Digite as observações..."
+            value={observacao}
+            onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
