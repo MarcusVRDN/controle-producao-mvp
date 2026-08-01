@@ -1,39 +1,59 @@
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const pedidos = [
-  {
-    id: 1,
-    codigo: "27934",
-    cliente: "GD do Brasil",
-    observacao: "Em análise",
-    status: "Aberto",
-  },
-  {
-    id: 2,
-    codigo: "450013278987",
-    cliente: "KHS",
-    observacao: "Orçado anteriormente",
-    status: "Aberto",
-  },
-  {
-    id: 3,
-    codigo: "POGG12345",
-    cliente: "Liebherr",
-    observacao: "Não foi aprovado",
-    status: "Cancelado",
-  },
-];
+type Cliente = {
+  id: number;
+  nome: string;
+};
+
+type Pedido = {
+  id: number;
+  codigo: string,
+  clienteId: number;
+  observacao: string;
+  status: boolean;
+};
 
 function Pedidos() {
   const navigate = useNavigate();
+
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  useEffect(() => {
+    async function buscarClientes() {
+      const response = await fetch("http://localhost:3001/clientes");
+      if (response.ok) {
+        const clientesApi = await response.json();
+        setClientes(clientesApi);
+      } else {
+        console.error("Erro ao buscar clientes");
+      }
+    }
+    buscarClientes();
+  });
+
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  useEffect(() => {
+    async function buscarPedidos() {
+      const response = await fetch("http://localhost:3001/pedidos");
+      if (response.ok) {
+        const pedidosApi = await response.json();
+        setPedidos(pedidosApi);
+      } else {
+        console.error("Erro ao buscar pedidos");
+      }
+    }
+    buscarPedidos();
+  });
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
         <h1 className="text-lg font-semibold text-white">Pedidos</h1>
 
-        <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-        onClick={() => navigate("/pedidos/novo")}>
+        <button
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+          onClick={() => navigate("/pedidos/novo")}
+        >
           <Plus size={18} />
           Adicionar Pedido
         </button>
@@ -67,7 +87,8 @@ function Pedidos() {
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {pedido.cliente}
+                  {clientes.find((cliente) => cliente.id === pedido.clienteId)
+                    ?.nome ?? "Cliente não encontrado"}
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
