@@ -1,5 +1,5 @@
 import { useState, useEffect, type SyntheticEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 type Cliente = {
   id: number;
@@ -7,14 +7,24 @@ type Cliente = {
   cnpj: string;
   contato?: string;
   telefone?: string;
-  status: string;
+  ativo: boolean;
 };
 
-function PedidoForm() {
+function PedidoEditForm() {
   const navigate = useNavigate();
   const [codigo, setCodigo] = useState("");
   const [clienteId, setClienteId] = useState("");
   const [observacao, setObservacao] = useState("");
+  const [status, setStatus] = useState("");
+
+  const statusPedido = [
+    { valor: "ABERTO", texto: "Aberto" },
+    { valor: "EM_ANDAMENTO", texto: "Em andamento" },
+    { valor: "CONCLUIDO", texto: "Concluído" },
+    { valor: "CANCELADO", texto: "Cancelado" },
+  ];
+
+  const { id } = useParams();
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   useEffect(() => {
@@ -30,6 +40,22 @@ function PedidoForm() {
     buscarClientes();
   }, []);
 
+  useEffect(() => {
+    async function buscarPedido() {
+      const response = await fetch(`http://localhost:3001/pedidos/${id}`);
+      if (response.ok) {
+        const pedidoApi = await response.json();
+        setCodigo(pedidoApi.codigo);
+        setClienteId(String(pedidoApi.clienteId));
+        setObservacao(pedidoApi.observacao ?? "");
+        setStatus(pedidoApi.status);
+      } else {
+        console.error("Erro ao buscar pedido");
+      }
+    }
+    buscarPedido();
+  }, [id]);
+
   async function onHandleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -37,9 +63,10 @@ function PedidoForm() {
       codigo,
       clienteId: Number(clienteId),
       observacao,
+      status,
     };
-    const response = await fetch("http://localhost:3001/pedidos", {
-      method: "POST",
+    const response = await fetch(`http://localhost:3001/pedidos/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -50,17 +77,15 @@ function PedidoForm() {
       console.log(obj);
       navigate("/pedidos");
     } else {
-      console.error("Erro ao cadastrar pedido");
+      console.error("Erro ao editar pedido");
     }
   }
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-white">Cadastrar Pedido</h1>
+        <h1 className="text-xl font-semibold text-white">Editar Pedido</h1>
 
-        <p className="text-sm text-slate-300">
-          Preencha os dados abaixo para criar um novo pedido.
-        </p>
+        <p className="text-sm text-slate-300">Edite os campos desejados.</p>
       </div>
 
       <form
@@ -133,6 +158,29 @@ function PedidoForm() {
           />
         </div>
 
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="status"
+            className="text-sm font-medium text-slate-700"
+          >
+            STATUS
+          </label>
+
+          <select
+            id="status"
+            name="status"
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+          >
+            {statusPedido.map((statusPedido) => (
+              <option key={statusPedido.valor} value={statusPedido.valor}>
+                {statusPedido.texto}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
           <button
             type="button"
@@ -146,7 +194,7 @@ function PedidoForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
-            title="Salvar pedido"
+            title="Salvar alterações"
           >
             Salvar
           </button>
@@ -156,4 +204,4 @@ function PedidoForm() {
   );
 }
 
-export default PedidoForm;
+export default PedidoEditForm;

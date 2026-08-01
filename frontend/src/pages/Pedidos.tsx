@@ -9,10 +9,10 @@ type Cliente = {
 
 type Pedido = {
   id: number;
-  codigo: string,
+  codigo: string;
   clienteId: number;
   observacao: string;
-  status: boolean;
+  status: string;
 };
 
 function Pedidos() {
@@ -30,7 +30,7 @@ function Pedidos() {
       }
     }
     buscarClientes();
-  });
+  },([]));
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   useEffect(() => {
@@ -44,7 +44,7 @@ function Pedidos() {
       }
     }
     buscarPedidos();
-  });
+  },([]));
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -104,6 +104,7 @@ function Pedidos() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar pedido"
+                      onClick={() => navigate(`/pedidos/editar/${pedido.id}`)}
                     >
                       <Pencil size={17} />
                     </button>
