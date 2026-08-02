@@ -1,15 +1,15 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 type Cliente = {
-    id: number;
-    nome: string;
-    cnpj: string;
-    contato?: string;
-    telefone?: string;
-    ativo: boolean;
-  };
+  id: number;
+  nome: string;
+  cnpj: string;
+  contato?: string;
+  telefone?: string;
+  ativo: boolean;
+};
 
 function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -20,13 +20,14 @@ function Clientes() {
       if (response.ok) {
         const clientesApi = await response.json();
         setClientes(clientesApi);
-      } else{
+      } else {
         console.error("Erro ao buscar clientes");
       }
     }
     buscarClientes();
-  },[]);
+  }, []);
   const navigate = useNavigate();
+
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -94,13 +95,7 @@ function Clientes() {
                     >
                       <Pencil size={17} />
                     </button>
-
-                    <button
-                      className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-white transition duration-200 hover:bg-slate-700"
-                      title="Excluir cliente"
-                    >
-                      <Trash2 size={17} />
-                    </button>
+                    
                   </div>
                 </td>
               </tr>

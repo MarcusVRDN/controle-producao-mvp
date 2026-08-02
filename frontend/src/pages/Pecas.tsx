@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -111,12 +111,6 @@ function Pecas() {
                       <Pencil size={17} />
                     </button>
 
-                    <button
-                      className="rounded-md p-2 text-red-600 transition hover:bg-red-100"
-                      title="Excluir peça"
-                    >
-                      <Trash2 size={17} />
-                    </button>
                   </div>
                 </td>
               </tr>
