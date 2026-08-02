@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   useState,
   type ChangeEvent,
@@ -26,7 +26,7 @@ type Pedido = {
   status: string;
 };
 
-function OrdemServicoForm() {
+function OrdemServicoEditForm() {
   const navigate = useNavigate();
   const [numero, setNumero] = useState(0);
   const [pedidoId, setPedidoId] = useState("");
@@ -37,6 +37,7 @@ function OrdemServicoForm() {
   const [setores, setSetores] = useState<string[]>([]);
   const [dataEntregaSolicitada, setDataEntregaSolicitada] = useState("");
   const [observacao, setObservacao] = useState("");
+  const [status, setStatus] = useState("");
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   useEffect(() => {
@@ -66,6 +67,38 @@ function OrdemServicoForm() {
     buscarPecas();
   }, []);
 
+  const statusOrdemServico = [
+    { valor: "NAO_INICIADA", texto: "Não iniciada" },
+    { valor: "EM_ANDAMENTO", texto: "Em andamento" },
+    { valor: "CONCLUIDA", texto: "Concluída" },
+    { valor: "CANCELADA", texto: "Cancelada" },
+  ];
+
+  const { id } = useParams();
+
+  useEffect(() => {
+    async function buscarOrdemServico() {
+      const response = await fetch(`http://localhost:3001/ordensServico/${id}`);
+      if (response.ok) {
+        const ordemServicoApi = await response.json();
+        setNumero(ordemServicoApi.numero);
+        setPedidoId(String(ordemServicoApi.pedidoId));
+        setPecaId(String(ordemServicoApi.pecaId));
+        setHorasUnitarias(ordemServicoApi.horasUnitarias);
+        setQuantidade(ordemServicoApi.quantidade);
+        setSetores(ordemServicoApi.setores.split(", "));
+        setDataEntregaSolicitada(
+          ordemServicoApi.dataEntregaSolicitada.split("T")[0],
+        );
+        setObservacao(ordemServicoApi.observacao);
+        setStatus(ordemServicoApi.status);
+      } else {
+        console.error("Erro ao buscar peça");
+      }
+    }
+    buscarOrdemServico();
+  }, [id]);
+
   async function onHandleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -81,9 +114,10 @@ function OrdemServicoForm() {
         `${dataEntregaSolicitada}T00:00:00`,
       ).toISOString(),
       observacao,
+      status,
     };
-    const response = await fetch("http://localhost:3001/ordensServico", {
-      method: "POST",
+    const response = await fetch(`http://localhost:3001/ordensServico/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -119,12 +153,10 @@ function OrdemServicoForm() {
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-white">
-          Cadastrar ordem de serviço
+          Editar ordem de serviço
         </h1>
 
-        <p className="text-sm text-slate-300">
-          Preencha os dados abaixo para criar uma nova ordem de serviço.
-        </p>
+        <p className="text-sm text-slate-300">Edite os campos desejados.</p>
       </div>
 
       <form
@@ -371,6 +403,31 @@ function OrdemServicoForm() {
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="status"
+            className="text-sm font-medium text-slate-700"
+          >
+            STATUS
+          </label>
+
+          <select
+            id="status"
+            name="status"
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+          >
+            {statusOrdemServico.map((statusOrdemServico) => (
+              <option
+                key={statusOrdemServico.valor}
+                value={statusOrdemServico.valor}
+              >
+                {statusOrdemServico.texto}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
           <button
             type="button"
@@ -384,7 +441,7 @@ function OrdemServicoForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
-            title="Salvar ordem de Serviço"
+            title="Salvar alterações"
           >
             Salvar
           </button>
@@ -394,4 +451,4 @@ function OrdemServicoForm() {
   );
 }
 
-export default OrdemServicoForm;
+export default OrdemServicoEditForm;

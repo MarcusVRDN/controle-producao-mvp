@@ -174,6 +174,7 @@ function OrdensServico() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar ordem de serviço"
+                      onClick={() => navigate(`./editar/${ordemServico.id}`)}
                     >
                       <Pencil size={17} />
                     </button>
