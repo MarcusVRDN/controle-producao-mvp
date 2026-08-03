@@ -65,7 +65,11 @@ function Clientes() {
 
           <tbody>
             {clientes.map((cliente) => (
-              <tr key={cliente.id} className="transition hover:bg-slate-300">
+              <tr
+                key={cliente.id}
+                className="transition hover:bg-slate-300"
+                onClick={() => navigate(`./view/${cliente.id}`)}
+              >
                 <td className="border-b border-slate-400 p-3">
                   {cliente.nome}
                 </td>
@@ -91,11 +95,13 @@ function Clientes() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar cliente"
-                      onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(`/clientes/editar/${cliente.id}`);
+                      }}
                     >
                       <Pencil size={17} />
                     </button>
-                    
                   </div>
                 </td>
               </tr>
