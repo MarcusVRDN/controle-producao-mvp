@@ -1,4 +1,4 @@
-import { Pencil, Plus} from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -30,7 +30,7 @@ function Pedidos() {
       }
     }
     buscarClientes();
-  },([]));
+  }, []);
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   useEffect(() => {
@@ -44,7 +44,7 @@ function Pedidos() {
       }
     }
     buscarPedidos();
-  },([]));
+  }, []);
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -81,7 +81,8 @@ function Pedidos() {
 
           <tbody>
             {pedidos.map((pedido) => (
-              <tr key={pedido.id} className="transition hover:bg-slate-300">
+              <tr key={pedido.id} className="transition hover:bg-slate-300"
+              onClick={() => navigate(`./view/${pedido.id}`)}>
                 <td className="border-b border-slate-400 p-3">
                   {pedido.codigo}
                 </td>
@@ -104,11 +105,13 @@ function Pedidos() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar pedido"
-                      onClick={() => navigate(`/pedidos/editar/${pedido.id}`)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(`/pedidos/editar/${pedido.id}`);
+                      }}
                     >
                       <Pencil size={17} />
                     </button>
-                    
                   </div>
                 </td>
               </tr>

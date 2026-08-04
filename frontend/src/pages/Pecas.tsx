@@ -85,7 +85,11 @@ function Pecas() {
 
           <tbody>
             {pecas.map((peca) => (
-              <tr key={peca.id} className="transition hover:bg-slate-300">
+              <tr
+                key={peca.id}
+                className="transition hover:bg-slate-300"
+                onClick={() => navigate(`./view/${peca.id}`)}
+              >
                 <td className="border-b border-slate-400 p-3">{peca.codigo}</td>
 
                 <td className="border-b border-slate-400 p-3">
@@ -106,11 +110,13 @@ function Pecas() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar peça"
-                      onClick={() => navigate(`/pecas/editar/${peca.id}`)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(`/pecas/editar/${peca.id}`);
+                      }}
                     >
                       <Pencil size={17} />
                     </button>
-
                   </div>
                 </td>
               </tr>
