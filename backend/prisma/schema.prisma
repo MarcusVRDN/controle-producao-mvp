@@ -26,65 +26,81 @@ enum StatusOrdemServico {
   CANCELADA
 }
 
+enum SetorOrdemServico {
+  TORNO_MECANICO
+  TORNO_CNC
+  CENTRO_USINAGEM
+  FRESA_CONVENCIONAL
+  MANDRILHADORA
+  RETIFICA
+  ROSQUEADEIRA
+  AJUSTAGEM
+  SERVICO_EXTERNO
+}
 
 model Cliente {
-id            Int       @id @default(autoincrement())
-nome          String  
-cnpj          String    @unique
-contato       String?
-telefone      String?
-ativo         Boolean   @default(true)
-pecas         Peca[]
-pedidos       Pedido[]
-createdAt     DateTime  @default(now())
-updatedAt     DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  nome      String
+  cnpj      String   @unique
+  contato   String?
+  telefone  String?
+  ativo     Boolean  @default(true)
+  pecas     Peca[]
+  pedidos   Pedido[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Peca {
-id                      Int     @id @default(autoincrement())
-codigo                  String
-clienteId               Int 
-descricao               String
-material                String
-tratamentoSuperficial   String?
-tratamentoTermico       String?
-terceirizacao           String?
-observacao              String?
-ordensServico           OrdemServico[]
-cliente                 Cliente         @relation(fields: [clienteId], references: [id])
-createdAt               DateTime  @default(now())
-updatedAt               DateTime  @updatedAt
-@@unique([codigo, clienteId])
+  id                    Int            @id @default(autoincrement())
+  codigo                String
+  clienteId             Int
+  descricao             String
+  material              String
+  tratamentoSuperficial String?
+  tratamentoTermico     String?
+  terceirizacao         String?
+  observacao            String?
+  ordensServico         OrdemServico[]
+  cliente               Cliente        @relation(fields: [clienteId], references: [id])
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@unique([codigo, clienteId])
 }
 
 model Pedido {
-id            Int             @id @default(autoincrement())
-codigo        String          @unique
-clienteId     Int
-status        StatusPedido    @default(ABERTO)
-observacao    String?
-cliente       Cliente         @relation(fields: [clienteId], references: [id])
-ordensServico OrdemServico[] 
-createdAt     DateTime        @default(now())
-updatedAt     DateTime        @updatedAt
+  id            Int            @id @default(autoincrement())
+  codigo        String         @unique
+  clienteId     Int
+  status        StatusPedido   @default(ABERTO)
+  observacao    String?
+  cliente       Cliente        @relation(fields: [clienteId], references: [id])
+  ordensServico OrdemServico[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model OrdemServico {
-id                    Int                 @id @default(autoincrement())
-numero                Int                 @unique
-pedidoId              Int
-pecaId                Int
-quantidade            Int
-horasUnitarias        Float
-horasTotais           Float
-setores               String
-dataEntregaSolicitada DateTime
-dataEntregaReal       DateTime?
-observacao            String?
-status                StatusOrdemServico  @default(NAO_INICIADA)
-pedido                Pedido              @relation(fields: [pedidoId], references: [id])
-peca                  Peca                @relation(fields: [pecaId], references: [id])
-createdAt             DateTime            @default(now())
-updatedAt             DateTime            @updatedAt
+  id                    Int                @id @default(autoincrement())
+  numero                Int                @unique
+  pedidoId              Int
+  pecaId                Int
+  quantidade            Int
+  horasUnitarias        Float
+  horasTotais           Float
+  setores               String
+  dataEntregaSolicitada DateTime
+  dataEntregaReal       DateTime?
+  observacao            String?
+  status                StatusOrdemServico @default(NAO_INICIADA)
+  setorAtual            SetorOrdemServico?
+  possuiRnc             Boolean            @default(false)
+  possuiDevolucao       Boolean            @default(false)
+  dataRnc               DateTime?
+  dataDevolucao         DateTime?
+  pedido                Pedido             @relation(fields: [pedidoId], references: [id])
+  peca                  Peca               @relation(fields: [pecaId], references: [id])
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 }
-
