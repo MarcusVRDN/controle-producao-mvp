@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, findAll, findById, remove, update } from "../controllers/ordemServico.controller.js";
+import { create, findAll, findById, remove, update, patchStatusAndSetor } from "../controllers/ordemServico.controller.js";
 
 const router = Router();
 
@@ -22,4 +22,8 @@ router.put(
 router.delete(
    "/:id", remove
 )
+
+router.patch(
+  "/ordensServico/:id/status-setor", patchStatusAndSetor,
+);
 export default router;

@@ -85,4 +85,19 @@ export const ordemServicoService = {
 
     return ordemServicoRepository.delete(id);
   },
+  async updateStatusAndSetor(
+    id: number,
+    data: {
+      status?: StatusOrdemServico;
+      setorAtual?: SetorOrdemServico | null;
+    },
+  ) {
+    const ordem = await ordemServicoRepository.findById(id);
+
+    if (!ordem) {
+      throw new Error("Ordem de serviço não encontrada");
+    }
+
+    return ordemServicoRepository.update(id, data);
+  },
 };
