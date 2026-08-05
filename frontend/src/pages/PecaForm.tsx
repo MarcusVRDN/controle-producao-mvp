@@ -177,12 +177,12 @@ function PecaForm() {
               <option value="" disabled>
                 Escolha o tratamento...
               </option>
-              <option value="nenhum">Nenhum</option>
-              <option value="tempera">Têmpera</option>
-              <option value="cementacao">Cementação</option>
-              <option value="nitretacao">Nitretação</option>
-              <option value="temperaInducao">Têmpera por indução</option>
-              <option value="temperaVacuo">Têmpera a vácuo</option>
+              <option value="Nenhum">Nenhum</option>
+              <option value="Tempera">Têmpera</option>
+              <option value="Cementacao">Cementação</option>
+              <option value="Nitretacao">Nitretação</option>
+              <option value="Tempera por Indução">Têmpera por indução</option>
+              <option value="Tempera à Vácuo">Têmpera a vácuo</option>
             </select>
           </div>
           <div className="flex flex-col gap-2">
@@ -203,18 +203,18 @@ function PecaForm() {
               <option value="" disabled>
                 Escolha o tratamento...
               </option>
-              <option value="nenhum">Nenhum</option>
-              <option value="niquel">Níquel Químico</option>
-              <option value="oxidacao">Oxidação Negra</option>
-              <option value="anodizacaoNatural">Anodização Natural</option>
-              <option value="anodizacaoDura">Anodização Dura</option>
-              <option value="zincagem">Zincagem</option>
-              <option value="fosfatizacao">Fosfatização</option>
-              <option value="jateamento">Jateamento</option>
-              <option value="pintura">Pintura</option>
-              <option value="plasma">Plasma</option>
-              <option value="cromo">Cromo</option>
-              <option value="silicone">Silicone</option>
+              <option value="Nenhum">Nenhum</option>
+              <option value="Niquel">Níquel Químico</option>
+              <option value="Oxidação">Oxidação Negra</option>
+              <option value="Anodização Natural">Anodização Natural</option>
+              <option value="Anodização Dura">Anodização Dura</option>
+              <option value="Zincagem">Zincagem</option>
+              <option value="Fosfatização">Fosfatização</option>
+              <option value="Jateamento">Jateamento</option>
+              <option value="Pintura">Pintura</option>
+              <option value="Plasma">Plasma</option>
+              <option value="Cromo">Cromo</option>
+              <option value="Silicone">Silicone</option>
             </select>
           </div>
           <div className="flex flex-col gap-2">
@@ -235,13 +235,13 @@ function PecaForm() {
               <option value="" disabled>
                 Escolha a terceirização...
               </option>
-              <option value="nenhuma">Nenhuma</option>
-              <option value="solda">Solda</option>
-              <option value="corteFio">Corte a fio</option>
-              <option value="corteLaser">Corte a laser</option>
-              <option value="calandra">Calandra</option>
-              <option value="balanceamento">Balanceamento</option>
-              <option value="furacaoProfunda">Furação Profunda</option>
+              <option value="Nenhuma">Nenhuma</option>
+              <option value="Solda">Solda</option>
+              <option value="Corte a Fio">Corte a fio</option>
+              <option value="Corte a Laser">Corte a laser</option>
+              <option value="Calandra">Calandra</option>
+              <option value="Balanceamento">Balanceamento</option>
+              <option value="Furação Profunda">Furação Profunda</option>
             </select>
           </div>
         </div>
