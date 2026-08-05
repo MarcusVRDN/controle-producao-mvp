@@ -70,3 +70,18 @@ export async function remove (req: Request, res: Response) {
         });
       }
     }
+
+export async function patchStatusAndSetor(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+
+    const ordemAtualizada =
+      await ordemServicoService.updateStatusAndSetor(id, req.body);
+
+    return res.status(200).json(ordemAtualizada);
+  } catch (error) {
+    return res.status(400).json({
+      error: error instanceof Error ? error.message : "Erro ao atualizar ordem",
+    });
+  }
+}
