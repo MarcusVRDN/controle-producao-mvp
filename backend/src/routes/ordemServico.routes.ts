@@ -24,6 +24,6 @@ router.delete(
 )
 
 router.patch(
-  "/ordensServico/:id/status-setor", patchStatusAndSetor,
+  "/:id", patchStatusAndSetor,
 );
 export default router;

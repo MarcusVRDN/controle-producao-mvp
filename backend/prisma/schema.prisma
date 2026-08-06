@@ -36,6 +36,8 @@ enum SetorOrdemServico {
   ROSQUEADEIRA
   AJUSTAGEM
   SERVICO_EXTERNO
+  QUALIDADE
+  LIBERADO
 }
 
 model Cliente {
