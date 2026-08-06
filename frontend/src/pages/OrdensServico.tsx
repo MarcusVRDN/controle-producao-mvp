@@ -26,6 +26,7 @@ type OrdemServico = {
   quantidade: number;
   dataEntregaSolicitada: string;
   status: string;
+  setorAtual: string | null;
 };
 
 function OrdensServico() {
@@ -87,6 +88,63 @@ function OrdensServico() {
     buscarOrdensServico();
   }, []);
 
+  const statusOrdemServico = [
+    { value: "ABERTA", label: "Aberta" },
+    { value: "EM_PRODUCAO", label: "Em produção" },
+    { value: "PAUSADA", label: "Pausada" },
+    { value: "CONCLUIDA", label: "Concluída" },
+    { value: "CANCELADA", label: "Cancelada" },
+  ];
+
+  const setores = [
+    { value: "TORNO", label: "Torno" },
+    { value: "FRESA", label: "Fresa" },
+    { value: "RETIFICA", label: "Retífica" },
+    { value: "CENTRO_USINAGEM", label: "Centro de usinagem" },
+    { value: "TORNO_CNC", label: "Torno CNC" },
+    { value: "MANDRILHADORA", label: "Mandrilhadora" },
+    { value: "AJUSTAGEM", label: "Ajustagem" },
+    { value: "ROSQUEADEIRA", label: "Rosqueadeira" },
+    { value: "QUALIDADE", label: "Qualidade" },
+    { value: "LIBERADO", label: "Liberado" },
+  ];
+
+  async function atualizarOrdemServico(
+    id: number,
+    dados: {
+      status?: string;
+      setorAtual?: string | null;
+    },
+  ) {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/ordensServico/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dados),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar ordem de serviço");
+      }
+
+      const ordemAtualizada: OrdemServico = await response.json();
+
+      setOrdensServico((ordensAtuais) =>
+        ordensAtuais.map((ordem) =>
+          ordem.id === id ? ordemAtualizada : ordem,
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível atualizar a ordem de serviço");
+    }
+  }
+
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -118,7 +176,7 @@ function OrdensServico() {
               <th className="border-b border-slate-600 p-3">Quantidade</th>
               <th className="border-b border-slate-600 p-3">Data de entrega</th>
               <th className="border-b border-slate-600 p-3">Status</th>
-
+              <th className="border-b border-slate-600 p-3">Setor atual</th>
               <th className="border-b border-slate-600 p-3 text-center">
                 Ações
               </th>
@@ -166,7 +224,41 @@ function OrdensServico() {
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
-                  {ordemServico.status}
+                  <select
+                    value={ordemServico.status}
+                    onChange={(event) =>
+                      atualizarOrdemServico(ordemServico.id, {
+                        status: event.target.value,
+                      })
+                    }
+                    className="rounded-md border border-slate-400 bg-slate-100 px-2 py-1 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  >
+                    {statusOrdemServico.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+
+                <td className="border-b border-slate-400 p-3">
+                  <select
+                    value={ordemServico.setorAtual ?? ""}
+                    onChange={(event) =>
+                      atualizarOrdemServico(ordemServico.id, {
+                        setorAtual: event.target.value || null,
+                      })
+                    }
+                    className="rounded-md border border-slate-400 bg-slate-100 px-2 py-1 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Sem setor</option>
+
+                    {setores.map((setor) => (
+                      <option key={setor.value} value={setor.value}>
+                        {setor.label}
+                      </option>
+                    ))}
+                  </select>
                 </td>
 
                 <td className="border-b border-slate-400 p-3">
@@ -178,7 +270,6 @@ function OrdensServico() {
                     >
                       <Pencil size={17} />
                     </button>
-
                   </div>
                 </td>
               </tr>
