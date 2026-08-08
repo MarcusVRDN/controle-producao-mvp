@@ -15,6 +15,7 @@ import OrdemServicoEditForm from "./pages/OrdemServicoEditForm";
 import ClienteView from "./pages/ClienteView";
 import PecaView from "./pages/PecaView";
 import PedidoView from "./pages/PedidoView";
+import OrdemServicoView from "./pages/OrdemServicoView";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/clientes/view/:id" element={<ClienteView />} />
         <Route path="/pecas/view/:id" element={<PecaView />} />
         <Route path="/pedidos/view/:id" element={<PedidoView />} />
+        <Route path="/ordens-servico/view/:id" element={<OrdemServicoView />} />
       </Route>
     </Routes>
   );
