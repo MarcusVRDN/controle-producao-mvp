@@ -188,6 +188,7 @@ function OrdensServico() {
               <tr
                 key={ordemServico.id}
                 className="transition hover:bg-slate-300"
+                onClick={() => navigate(`./view/${ordemServico.id}`)}
               >
                 <td className="border-b border-slate-400 p-3">
                   {ordemServico.numero}
@@ -266,7 +267,10 @@ function OrdensServico() {
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
                       title="Editar ordem de serviço"
-                      onClick={() => navigate(`./editar/${ordemServico.id}`)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(`/ordens-servico/editar/${ordemServico.id}`);
+                      }}
                     >
                       <Pencil size={17} />
                     </button>
