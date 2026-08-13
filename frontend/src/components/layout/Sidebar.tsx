@@ -3,6 +3,10 @@ import { NavLink } from "react-router-dom";
 function Sidebar() {
   const menuItems = [
     {
+      nome: "Dashboard",
+      caminho: "/dashboard",
+    },
+    {
       nome: "Clientes",
       caminho: "/clientes",
     },
