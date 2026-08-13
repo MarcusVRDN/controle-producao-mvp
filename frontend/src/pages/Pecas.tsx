@@ -49,6 +49,30 @@ function Pecas() {
   }, []);
 
   const navigate = useNavigate();
+
+  const [pesquisa, setPesquisa] = useState("");
+  const [filtroCliente, setFiltroCliente] = useState("TODOS");
+  const [ordenacao, setOrdenacao] = useState("CRESCENTE");
+
+  const pecasFiltradas = pecas.filter((peca) => {
+    const termo = pesquisa.trim().toLowerCase();
+
+    const correspondePesquisa = peca.codigo.toLowerCase().includes(termo);
+
+    const correspondeCliente =
+      filtroCliente === "TODOS" || Number(filtroCliente) === peca.clienteId;
+
+    return correspondePesquisa && correspondeCliente;
+  });
+
+  const pecasOrdenadas = [...pecasFiltradas].sort((a, b) => {
+    if (ordenacao === "CRESCENTE") {
+      return a.codigo.localeCompare(b.codigo);
+    }
+
+    return b.codigo.localeCompare(a.codigo);
+  });
+
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -61,6 +85,39 @@ function Pecas() {
           <Plus size={18} />
           Adicionar Peça
         </button>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <input
+          type="text"
+          placeholder="Pesquisar por código..."
+          value={pesquisa}
+          onChange={(event) => setPesquisa(event.target.value)}
+          className="w-full max-w-md rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+        />
+
+        <select
+          value={filtroCliente}
+          onChange={(event) => setFiltroCliente(event.target.value)}
+          className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
+        >
+          <option value="TODOS">Todos os clientes</option>
+
+          {clientes.map((cliente) => (
+            <option key={cliente.id} value={cliente.id}>
+              {cliente.nome}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={ordenacao}
+          onChange={(event) => setOrdenacao(event.target.value)}
+          className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
+        >
+          <option value="CRESCENTE">Crescente</option>
+          <option value="DECRESCENTE">Decrescente</option>
+        </select>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-600">
@@ -78,7 +135,7 @@ function Pecas() {
           </thead>
 
           <tbody>
-            {pecas.map((peca) => (
+            {pecasOrdenadas.map((peca) => (
               <tr
                 key={peca.id}
                 className="transition hover:bg-slate-300"
