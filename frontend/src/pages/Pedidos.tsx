@@ -59,11 +59,6 @@ function Pedidos() {
         </button>
       </div>
 
-      <input
-        type="text"
-        placeholder="Pesquisar pedido..."
-        className="w-full max-w-md rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-      />
 
       <div className="overflow-hidden rounded-lg border border-slate-600">
         <table className="w-full border-collapse bg-slate-200 text-left text-sm">
