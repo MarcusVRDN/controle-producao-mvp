@@ -45,6 +45,33 @@ function Pedidos() {
     }
     buscarPedidos();
   }, []);
+
+  const [pesquisa, setPesquisa] = useState("");
+  const [filtroCliente, setFiltroCliente] = useState("TODOS");
+  const [filtroStatus, setFiltroStatus] = useState("TODOS");
+  const [ordenacao, setOrdenacao] = useState("CRESCENTE");
+
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const termo = pesquisa.trim().toLowerCase();
+
+    const correspondePesquisa = pedido.codigo.toLowerCase().includes(termo);
+
+    const correspondeCliente =
+      filtroCliente === "TODOS" || Number(filtroCliente) === pedido.clienteId;
+
+    const correspondeStatus =
+      filtroStatus === "TODOS" || pedido.status === filtroStatus;
+
+    return correspondePesquisa && correspondeCliente && correspondeStatus;
+  });
+
+  const pedidosOrdenados = [...pedidosFiltrados].sort((a, b) => {
+    if (ordenacao === "CRESCENTE") {
+      return a.codigo.localeCompare(b.codigo);
+    }
+
+    return b.codigo.localeCompare(a.codigo);
+  });
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -58,7 +85,50 @@ function Pedidos() {
           Adicionar Pedido
         </button>
       </div>
+      <div className="flex flex-wrap gap-3">
+        <input
+          type="text"
+          placeholder="Pesquisar por código..."
+          value={pesquisa}
+          onChange={(event) => setPesquisa(event.target.value)}
+          className="w-full max-w-md rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+        />
 
+        <select
+          value={filtroStatus}
+          onChange={(event) => setFiltroStatus(event.target.value)}
+          className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
+        >
+          <option value="TODOS">Todos os status</option>
+          <option value="ABERTO">Aberto</option>
+          <option value="EM_ANDAMENTO">Em andamento</option>
+          <option value="CONCLUIDO">Concluído</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
+
+        <select
+          value={filtroCliente}
+          onChange={(event) => setFiltroCliente(event.target.value)}
+          className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
+        >
+          <option value="TODOS">Todos os clientes</option>
+
+          {clientes.map((cliente) => (
+            <option key={cliente.id} value={cliente.id}>
+              {cliente.nome}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={ordenacao}
+          onChange={(event) => setOrdenacao(event.target.value)}
+          className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
+        >
+          <option value="CRESCENTE">Crescente</option>
+          <option value="DECRESCENTE">Decrescente</option>
+        </select>
+      </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-600">
         <table className="w-full border-collapse bg-slate-200 text-left text-sm">
@@ -75,9 +145,12 @@ function Pedidos() {
           </thead>
 
           <tbody>
-            {pedidos.map((pedido) => (
-              <tr key={pedido.id} className="transition hover:bg-slate-300"
-              onClick={() => navigate(`./view/${pedido.id}`)}>
+            {pedidosOrdenados.map((pedido) => (
+              <tr
+                key={pedido.id}
+                className="transition hover:bg-slate-300"
+                onClick={() => navigate(`./view/${pedido.id}`)}
+              >
                 <td className="border-b border-slate-400 p-3">
                   {pedido.codigo}
                 </td>
