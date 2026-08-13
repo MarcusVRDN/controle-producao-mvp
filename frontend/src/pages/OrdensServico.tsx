@@ -89,11 +89,10 @@ function OrdensServico() {
   }, []);
 
   const statusOrdemServico = [
-    { value: "ABERTA", label: "Aberta" },
-    { value: "EM_PRODUCAO", label: "Em produção" },
-    { value: "PAUSADA", label: "Pausada" },
-    { value: "CONCLUIDA", label: "Concluída" },
-    { value: "CANCELADA", label: "Cancelada" },
+    { valor: "NAO_INICIADA", texto: "Não iniciada" },
+    { valor: "EM_ANDAMENTO", texto: "Em andamento" },
+    { valor: "CONCLUIDA", texto: "Concluída" },
+    { valor: "CANCELADA", texto: "Cancelada" },
   ];
 
   const setores = [
@@ -117,6 +116,8 @@ function OrdensServico() {
     },
   ) {
     try {
+      console.log("Dados enviados:", dados);
+
       const response = await fetch(
         `http://localhost:3001/ordensServico/${id}`,
         {
@@ -129,10 +130,14 @@ function OrdensServico() {
       );
 
       if (!response.ok) {
+        const erro = await response.json();
+
+        console.error("Erro retornado pelo backend:", erro);
+
         throw new Error("Erro ao atualizar ordem de serviço");
       }
 
-      const ordemAtualizada: OrdemServico = await response.json();
+      const ordemAtualizada = await response.json();
 
       setOrdensServico((ordensAtuais) =>
         ordensAtuais.map((ordem) =>
@@ -141,6 +146,7 @@ function OrdensServico() {
       );
     } catch (error) {
       console.error(error);
+
       alert("Não foi possível atualizar a ordem de serviço");
     }
   }
@@ -227,6 +233,9 @@ function OrdensServico() {
                 <td className="border-b border-slate-400 p-3">
                   <select
                     value={ordemServico.status}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                    }}
                     onChange={(event) =>
                       atualizarOrdemServico(ordemServico.id, {
                         status: event.target.value,
@@ -235,8 +244,8 @@ function OrdensServico() {
                     className="rounded-md border border-slate-400 bg-slate-100 px-2 py-1 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                   >
                     {statusOrdemServico.map((status) => (
-                      <option key={status.value} value={status.value}>
-                        {status.label}
+                      <option key={status.valor} value={status.valor}>
+                        {status.texto}
                       </option>
                     ))}
                   </select>
@@ -245,6 +254,9 @@ function OrdensServico() {
                 <td className="border-b border-slate-400 p-3">
                   <select
                     value={ordemServico.setorAtual ?? ""}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                    }}
                     onChange={(event) =>
                       atualizarOrdemServico(ordemServico.id, {
                         setorAtual: event.target.value || null,

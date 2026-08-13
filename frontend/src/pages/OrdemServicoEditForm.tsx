@@ -57,9 +57,14 @@ function OrdemServicoEditForm() {
   const [quantidade, setQuantidade] = useState(0);
   const [setores, setSetores] = useState<string[]>([]);
   const [dataEntregaSolicitada, setDataEntregaSolicitada] = useState("");
+  const [dataEntregaReal, setDataEntregaReal] = useState("");
   const [observacao, setObservacao] = useState("");
   const [status, setStatus] = useState("");
   const [setorAtual, setSetorAtual] = useState("");
+  const [possuiRnc, setPossuiRnc] = useState(false);
+  const [dataRnc, setDataRnc] = useState("");
+  const [possuiDevolucao, setPossuiDevolucao] = useState(false);
+  const [dataDevolucao, setDataDevolucao] = useState("");
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pecas, setPecas] = useState<Peca[]>([]);
@@ -128,9 +133,7 @@ function OrdemServicoEditForm() {
         setHorasUnitarias(ordemServicoApi.horasUnitarias);
         setQuantidade(ordemServicoApi.quantidade);
         setSetores(
-          ordemServicoApi.setores
-            ? ordemServicoApi.setores.split(", ")
-            : [],
+          ordemServicoApi.setores ? ordemServicoApi.setores.split(", ") : [],
         );
         setDataEntregaSolicitada(
           ordemServicoApi.dataEntregaSolicitada.split("T")[0],
@@ -162,14 +165,31 @@ function OrdemServicoEditForm() {
       quantidade,
       horasTotais,
       setores: setores.join(", "),
+
       dataEntregaSolicitada: new Date(
         `${dataEntregaSolicitada}T00:00:00`,
       ).toISOString(),
+
+      dataEntregaReal: dataEntregaReal
+        ? new Date(`${dataEntregaReal}T00:00:00`).toISOString()
+        : null,
+
       observacao,
       status,
       setorAtual: setorAtual || null,
-    };
 
+      possuiRnc,
+      dataRnc:
+        possuiRnc && dataRnc
+          ? new Date(`${dataRnc}T00:00:00`).toISOString()
+          : null,
+
+      possuiDevolucao,
+      dataDevolucao:
+        possuiDevolucao && dataDevolucao
+          ? new Date(`${dataDevolucao}T00:00:00`).toISOString()
+          : null,
+    };
     try {
       const response = await fetch(
         `http://localhost:3001/ordensServico/${id}`,
@@ -460,7 +480,24 @@ function OrdemServicoEditForm() {
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="dataEntregaReal"
+            className="text-sm font-medium text-slate-700"
+          >
+            Data de entrega real
+          </label>
 
+          <input
+            id="dataEntregaReal"
+            name="dataEntregaReal"
+            type="date"
+            value={dataEntregaReal}
+            onChange={(event) => setDataEntregaReal(event.target.value)}
+            required
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+          />
+        </div>
         <div className="flex flex-col gap-2">
           <label
             htmlFor="observacao"
@@ -531,6 +568,50 @@ function OrdemServicoEditForm() {
           </div>
         </div>
 
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={possuiRnc}
+            onChange={(event) => setPossuiRnc(event.target.checked)}
+          />
+          Possui RNC?
+        </label>
+        {possuiRnc && (
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Data da RNC
+            </label>
+
+            <input
+              type="date"
+              value={dataRnc}
+              onChange={(event) => setDataRnc(event.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            />
+          </div>
+        )}
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={possuiDevolucao}
+            onChange={(event) => setPossuiDevolucao(event.target.checked)}
+          />
+          Possui Devolução
+        </label>
+        {possuiDevolucao && (
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Data da Devolução
+            </label>
+
+            <input
+              type="date"
+              value={dataDevolucao}
+              onChange={(event) => setDataDevolucao(event.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            />
+          </div>
+        )}
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
           <button
             type="button"

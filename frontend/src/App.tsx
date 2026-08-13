@@ -16,12 +16,14 @@ import ClienteView from "./pages/ClienteView";
 import PecaView from "./pages/PecaView";
 import PedidoView from "./pages/PedidoView";
 import OrdemServicoView from "./pages/OrdemServicoView";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Navigate to= "/clientes" replace/>}/>
+        <Route index element={<Navigate to= "/dashboard" replace/>}/>
+        <Route path="/dashboard" element={<Dashboard />}/>
         <Route path="/clientes" element={<Clientes />}/>
         <Route path="/pecas" element={<Pecas />} />
         <Route path="/pedidos" element={<Pedidos/>} />
