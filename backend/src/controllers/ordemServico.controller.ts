@@ -1,87 +1,169 @@
+import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
-import { ordemServicoService } from "../services/ordemServicoService.js";
+import {
+  ordemServicoService,
+  OrdemServicoNotFoundError,
+  OrdemServicoValidationError,
+} from "../services/ordemServicoService.js";
+
+function parseRouteId(rawId: string | string[] | undefined): number | null {
+  if (typeof rawId !== "string") {
+    return null;
+  }
+
+  const id = Number(rawId);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return null;
+  }
+
+  return id;
+}
+
+function isUniqueNumeroError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  );
+}
+
+function handleOrdemServicoError(
+  error: unknown,
+  res: Response,
+  unexpectedMessage: string,
+) {
+  if (error instanceof OrdemServicoValidationError) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  if (error instanceof OrdemServicoNotFoundError) {
+    return res.status(404).json({ error: error.message });
+  }
+
+  if (isUniqueNumeroError(error)) {
+    return res.status(409).json({
+      error: "Numero da ordem de servico ja cadastrado",
+    });
+  }
+
+  console.error(error);
+  return res.status(500).json({ error: unexpectedMessage });
+}
 
 export async function create(req: Request, res: Response) {
-    try {
-        const ordemServico = await ordemServicoService.create(req.body);
+  try {
+    const ordemServico = await ordemServicoService.create(req.body);
 
-        return res.status(201).json(ordemServico);
-    } catch (error) {
-        console.error(error);
-    return res.status(400).json({
-      error: error instanceof Error ? error.message : "Erro ao criar ordem de serviço",
-    });
-    }
-};
+    return res.status(201).json(ordemServico);
+  } catch (error) {
+    return handleOrdemServicoError(
+      error,
+      res,
+      "Erro interno ao criar ordem de servico",
+    );
+  }
+}
 
 export async function findAll(req: Request, res: Response) {
-    try {
-        const ordensServico = await ordemServicoService.findAll();
+  try {
+    const ordensServico = await ordemServicoService.findAll();
 
-        return res.status(200).json(ordensServico)
-    } catch (error){
-        console.error(error);
-
-        return res.status(500).json({ error: "Erro ao buscar ordens de serviço" });
-    }
-};
+    return res.status(200).json(ordensServico);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: "Erro interno ao buscar ordens de servico",
+    });
+  }
+}
 
 export async function findById(req: Request, res: Response) {
-    try {
-        const id = Number(req.params.id);
+  const id = parseRouteId(req.params.id);
 
-        const ordemServico = await ordemServicoService.findById(id);
+  if (id === null) {
+    return res.status(400).json({
+      error: "ID da ordem de servico invalido",
+    });
+  }
 
-        return res.status(200).json(ordemServico)
-    } catch (error) {
-        console.error(error);
-        return res.status(404).json({
-            error: error instanceof Error ? error.message : "Erro ao buscar ordem de serviço",
-        });
-    }
-};
+  try {
+    const ordemServico = await ordemServicoService.findById(id);
 
-export async function update (req: Request, res: Response) {
-    try {
-        const id = Number(req.params.id);
-        
-        const ordemServico = await ordemServicoService.update(id, req.body);
+    return res.status(200).json(ordemServico);
+  } catch (error) {
+    return handleOrdemServicoError(
+      error,
+      res,
+      "Erro interno ao buscar ordem de servico",
+    );
+  }
+}
 
-        return res.status(200).json(ordemServico)
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json({
-            error: error instanceof Error ? error.message : "Erro ao atualizar ordem de serviço",
-        });
-    }
-};
+export async function update(req: Request, res: Response) {
+  const id = parseRouteId(req.params.id);
 
-export async function remove (req: Request, res: Response) {
-      try {
-        const id = Number(req.params.id);
-    
-        await ordemServicoService.delete(id);
-    
-        return res.status(204).send();
-      } catch (error) {
-        console.error(error);
-        return res.status(400).json({
-          error: error instanceof Error ? error.message : "Erro ao remover ordem de serviço",
-        });
-      }
-    }
+  if (id === null) {
+    return res.status(400).json({
+      error: "ID da ordem de servico invalido",
+    });
+  }
+
+  try {
+    const ordemServico = await ordemServicoService.update(id, req.body);
+
+    return res.status(200).json(ordemServico);
+  } catch (error) {
+    return handleOrdemServicoError(
+      error,
+      res,
+      "Erro interno ao atualizar ordem de servico",
+    );
+  }
+}
+
+export async function remove(req: Request, res: Response) {
+  const id = parseRouteId(req.params.id);
+
+  if (id === null) {
+    return res.status(400).json({
+      error: "ID da ordem de servico invalido",
+    });
+  }
+
+  try {
+    await ordemServicoService.delete(id);
+
+    return res.status(204).send();
+  } catch (error) {
+    return handleOrdemServicoError(
+      error,
+      res,
+      "Erro interno ao remover ordem de servico",
+    );
+  }
+}
 
 export async function patchStatusAndSetor(req: Request, res: Response) {
-  try {
-    const id = Number(req.params.id);
+  const id = parseRouteId(req.params.id);
 
-    const ordemAtualizada =
-      await ordemServicoService.updateStatusAndSetor(id, req.body);
+  if (id === null) {
+    return res.status(400).json({
+      error: "ID da ordem de servico invalido",
+    });
+  }
+
+  try {
+    const ordemAtualizada = await ordemServicoService.updateStatusAndSetor(
+      id,
+      req.body,
+    );
 
     return res.status(200).json(ordemAtualizada);
   } catch (error) {
-    return res.status(400).json({
-      error: error instanceof Error ? error.message : "Erro ao atualizar ordem",
-    });
+    return handleOrdemServicoError(
+      error,
+      res,
+      "Erro interno ao atualizar status da ordem de servico",
+    );
   }
 }

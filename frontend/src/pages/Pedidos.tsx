@@ -197,7 +197,7 @@ function Pedidos() {
             ))}
           </tbody>
         </table>
-                <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <button
             onClick={() => setPaginaAtual((pagina) => pagina - 1)}
             disabled={paginaAtual === 1}
