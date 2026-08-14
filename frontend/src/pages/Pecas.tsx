@@ -73,6 +73,16 @@ function Pecas() {
     return b.codigo.localeCompare(a.codigo);
   });
 
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 10;
+
+  const indiceInicial = (paginaAtual - 1) * 10;
+  const indiceFinal = indiceInicial + itensPorPagina;
+
+  const pecasPaginadas = pecasOrdenadas.slice(indiceInicial, indiceFinal);
+
+  const totalPaginas = Math.ceil(pecasOrdenadas.length / itensPorPagina);
+
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
@@ -135,7 +145,7 @@ function Pecas() {
           </thead>
 
           <tbody>
-            {pecasOrdenadas.map((peca) => (
+            {pecasPaginadas.map((peca) => (
               <tr
                 key={peca.id}
                 className="transition hover:bg-slate-300"
@@ -174,6 +184,27 @@ function Pecas() {
             ))}
           </tbody>
         </table>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setPaginaAtual((pagina) => pagina - 1)}
+            disabled={paginaAtual === 1}
+            className="rounded-md bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
+          >
+            Anterior
+          </button>
+
+          <span className="text-sm text-slate-300">
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+
+          <button
+            onClick={() => setPaginaAtual((pagina) => pagina + 1)}
+            disabled={paginaAtual === totalPaginas || totalPaginas === 0}
+            className="rounded-md bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
+          >
+            Próxima
+          </button>
+        </div>
       </div>
     </section>
   );
