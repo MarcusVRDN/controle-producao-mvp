@@ -320,10 +320,24 @@ function applyStatusRules(args: {
 
   if (status === StatusOrdemServico.CONCLUIDA) {
     setorAtual = SetorOrdemServico.LIBERADO;
-    dataEntregaReal =
-      current?.status === StatusOrdemServico.CONCLUIDA && current.dataEntregaReal
-        ? current.dataEntregaReal
-        : new Date();
+    if (current?.status === StatusOrdemServico.CONCLUIDA) {
+      if (dataEntregaRealProvided) {
+        if (dataEntregaReal === null) {
+          throw new OrdemServicoValidationError(
+            "Ordens concluidas exigem data de entrega real preenchida",
+          );
+        }
+
+        return { setorAtual, dataEntregaReal };
+      }
+
+      return {
+        setorAtual,
+        dataEntregaReal: current.dataEntregaReal ?? new Date(),
+      };
+    }
+
+    dataEntregaReal = new Date();
 
     return { setorAtual, dataEntregaReal };
   }
