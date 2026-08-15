@@ -1,14 +1,39 @@
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, type SyntheticEvent } from "react";
+import {
+  terceirizacaoOptions,
+  tratamentoSuperficialOptions,
+  tratamentoTermicoOptions,
+} from "./pecaOptions";
 
 type Cliente = {
   id: number;
   nome: string;
-  cnpj: string;
-  contato?: string;
-  telefone?: string;
   ativo: boolean;
 };
+
+async function getResponseErrorMessage(
+  response: Response,
+  fallbackMessage: string,
+) {
+  try {
+    const payload = await response.json();
+
+    if (
+      payload &&
+      typeof payload === "object" &&
+      "error" in payload &&
+      typeof payload.error === "string" &&
+      payload.error.trim() !== ""
+    ) {
+      return payload.error;
+    }
+  } catch {
+    return fallbackMessage;
+  }
+
+  return fallbackMessage;
+}
 
 function PecaForm() {
   const navigate = useNavigate();
@@ -20,55 +45,122 @@ function PecaForm() {
   const [tratamentoSuperficial, setTratamentoSuperficial] = useState("");
   const [terceirizacao, setTerceirizacao] = useState("");
   const [observacao, setObservacao] = useState("");
-
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [carregandoOpcoes, setCarregandoOpcoes] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erroCarregamento, setErroCarregamento] = useState("");
+  const [erroSubmit, setErroSubmit] = useState("");
+
   useEffect(() => {
     async function buscarClientes() {
-      const response = await fetch("http://localhost:3001/clientes");
-      if (response.ok) {
+      setCarregandoOpcoes(true);
+      setErroCarregamento("");
+
+      try {
+        const response = await fetch("http://localhost:3001/clientes");
+
+        if (!response.ok) {
+          throw new Error("Nao foi possivel carregar os clientes.");
+        }
+
         const clientesApi = await response.json();
         setClientes(clientesApi);
-      } else {
-        console.error("Erro ao buscar clientes");
+      } catch (error) {
+        console.error(error);
+        setErroCarregamento("Nao foi possivel carregar os clientes da peca.");
+      } finally {
+        setCarregandoOpcoes(false);
       }
     }
+
     buscarClientes();
   }, []);
 
-  async function onHandleSubmit(event: SyntheticEvent<HTMLFormElement>) {
+  async function onHandleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setErroSubmit("");
+
+    const codigoNormalizado = codigo.trim();
+    const descricaoNormalizada = descricao.trim();
+    const materialNormalizado = material.trim();
+    const observacaoNormalizada = observacao.trim();
+    const clienteIdNormalizado = Number(clienteId);
+
+    if (codigoNormalizado === "") {
+      setErroSubmit("Informe o codigo da peca.");
+      return;
+    }
+
+    if (!Number.isInteger(clienteIdNormalizado) || clienteIdNormalizado <= 0) {
+      setErroSubmit("Selecione um cliente valido.");
+      return;
+    }
+
+    if (descricaoNormalizada === "") {
+      setErroSubmit("Informe a descricao da peca.");
+      return;
+    }
+
+    if (materialNormalizado === "") {
+      setErroSubmit("Informe o material da peca.");
+      return;
+    }
 
     const peca = {
-      codigo,
-      clienteId: Number(clienteId),
-      descricao,
-      material,
-      tratamentoTermico,
-      tratamentoSuperficial,
-      terceirizacao,
-      observacao
+      codigo: codigoNormalizado,
+      clienteId: clienteIdNormalizado,
+      descricao: descricaoNormalizada,
+      material: materialNormalizado,
+      tratamentoTermico: tratamentoTermico || null,
+      tratamentoSuperficial: tratamentoSuperficial || null,
+      terceirizacao: terceirizacao || null,
+      observacao: observacaoNormalizada === "" ? null : observacaoNormalizada,
     };
-    const response = await fetch("http://localhost:3001/pecas", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(peca),
-    });
-    if (response.ok) {
-      const obj = await response.json();
-      console.log (obj);
-      navigate("/pecas")
+
+    setSalvando(true);
+
+    try {
+      const response = await fetch("http://localhost:3001/pecas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(peca),
+      });
+
+      if (!response.ok) {
+        let fallbackMessage = "Nao foi possivel cadastrar a peca agora.";
+
+        if (response.status === 404) {
+          fallbackMessage = "Cliente nao encontrado.";
+        }
+
+        if (response.status === 409) {
+          fallbackMessage =
+            "Ja existe uma peca com esse codigo para o cliente informado.";
+        }
+
+        const message = await getResponseErrorMessage(response, fallbackMessage);
+        setErroSubmit(message);
+        return;
+      }
+
+      navigate("/pecas");
+    } catch (error) {
+      console.error(error);
+      setErroSubmit("Nao foi possivel conectar com a API para cadastrar a peca.");
+    } finally {
+      setSalvando(false);
     }
   }
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-white">Cadastrar Peça</h1>
+        <h1 className="text-xl font-semibold text-white">Cadastrar Peca</h1>
 
         <p className="text-sm text-slate-300">
-          Preencha os dados abaixo para criar uma nova peça.
+          Preencha os dados abaixo para criar uma nova peca.
         </p>
       </div>
 
@@ -76,13 +168,25 @@ function PecaForm() {
         className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md"
         onSubmit={onHandleSubmit}
       >
+        {erroCarregamento ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {erroCarregamento}
+          </div>
+        ) : null}
+
+        {erroSubmit ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {erroSubmit}
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-2">
             <label
               htmlFor="codigo"
               className="text-sm font-medium text-slate-700"
             >
-              Código
+              Codigo
             </label>
 
             <input
@@ -91,7 +195,7 @@ function PecaForm() {
               type="text"
               value={codigo}
               onChange={(event) => setCodigo(event.target.value)}
-              placeholder="Digite o código da peça..."
+              placeholder="Digite o codigo da peca..."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -109,11 +213,13 @@ function PecaForm() {
               name="clienteId"
               value={clienteId}
               onChange={(event) => setClienteId(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+              disabled={carregandoOpcoes || salvando}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100"
             >
               <option value="" disabled>
-                Escolha o cliente...
+                {carregandoOpcoes ? "Carregando clientes..." : "Escolha o cliente..."}
               </option>
+
               {clientes.map((cliente) => (
                 <option key={cliente.id} value={cliente.id}>
                   {cliente.nome}
@@ -122,12 +228,13 @@ function PecaForm() {
             </select>
           </div>
         </div>
+
         <div className="flex flex-col gap-2">
           <label
             htmlFor="descricao"
             className="text-sm font-medium text-slate-700"
           >
-            Descrição
+            Descricao
           </label>
 
           <input
@@ -136,10 +243,11 @@ function PecaForm() {
             type="text"
             value={descricao}
             onChange={(event) => setDescricao(event.target.value)}
-            placeholder="Digite a descrição da peça..."
+            placeholder="Digite a descricao da peca..."
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
+
         <div className="flex flex-col gap-2">
           <label
             htmlFor="material"
@@ -153,18 +261,19 @@ function PecaForm() {
             name="material"
             type="text"
             value={material}
-            placeholder="Digite o material da peça..."
+            placeholder="Digite o material da peca..."
             onChange={(event) => setMaterial(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2">
             <label
               htmlFor="tratamentoTermico"
               className="text-sm font-medium text-slate-700"
             >
-              Tratamento Térmico
+              Tratamento Termico
             </label>
 
             <select
@@ -174,17 +283,16 @@ function PecaForm() {
               onChange={(event) => setTratamentoTermico(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
-              <option value="" disabled>
-                Escolha o tratamento...
-              </option>
-              <option value="Nenhum">Nenhum</option>
-              <option value="Tempera">Têmpera</option>
-              <option value="Cementacao">Cementação</option>
-              <option value="Nitretacao">Nitretação</option>
-              <option value="Tempera por Indução">Têmpera por indução</option>
-              <option value="Tempera à Vácuo">Têmpera a vácuo</option>
+              <option value="">Sem tratamento</option>
+
+              {tratamentoTermicoOptions.map((opcao) => (
+                <option key={opcao} value={opcao}>
+                  {opcao}
+                </option>
+              ))}
             </select>
           </div>
+
           <div className="flex flex-col gap-2">
             <label
               htmlFor="tratamentoSuperficial"
@@ -200,29 +308,22 @@ function PecaForm() {
               onChange={(event) => setTratamentoSuperficial(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
-              <option value="" disabled>
-                Escolha o tratamento...
-              </option>
-              <option value="Nenhum">Nenhum</option>
-              <option value="Niquel">Níquel Químico</option>
-              <option value="Oxidação">Oxidação Negra</option>
-              <option value="Anodização Natural">Anodização Natural</option>
-              <option value="Anodização Dura">Anodização Dura</option>
-              <option value="Zincagem">Zincagem</option>
-              <option value="Fosfatização">Fosfatização</option>
-              <option value="Jateamento">Jateamento</option>
-              <option value="Pintura">Pintura</option>
-              <option value="Plasma">Plasma</option>
-              <option value="Cromo">Cromo</option>
-              <option value="Silicone">Silicone</option>
+              <option value="">Sem tratamento</option>
+
+              {tratamentoSuperficialOptions.map((opcao) => (
+                <option key={opcao} value={opcao}>
+                  {opcao}
+                </option>
+              ))}
             </select>
           </div>
+
           <div className="flex flex-col gap-2">
             <label
               htmlFor="terceirizacao"
               className="text-sm font-medium text-slate-700"
             >
-              Terceirização
+              Terceirizacao
             </label>
 
             <select
@@ -232,42 +333,42 @@ function PecaForm() {
               onChange={(event) => setTerceirizacao(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
-              <option value="" disabled>
-                Escolha a terceirização...
-              </option>
-              <option value="Nenhuma">Nenhuma</option>
-              <option value="Solda">Solda</option>
-              <option value="Corte a Fio">Corte a fio</option>
-              <option value="Corte a Laser">Corte a laser</option>
-              <option value="Calandra">Calandra</option>
-              <option value="Balanceamento">Balanceamento</option>
-              <option value="Furação Profunda">Furação Profunda</option>
+              <option value="">Sem terceirizacao</option>
+
+              {terceirizacaoOptions.map((opcao) => (
+                <option key={opcao} value={opcao}>
+                  {opcao}
+                </option>
+              ))}
             </select>
           </div>
         </div>
+
         <div className="flex flex-col gap-2">
           <label
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observação
+            Observacao
           </label>
 
           <textarea
             id="observacao"
             name="observacao"
             rows={4}
-            placeholder="Digite as observações..."
-            value = {observacao}
+            placeholder="Digite as observacoes..."
+            value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
+
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
           <button
             type="button"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             title="Cancelar"
+            disabled={salvando}
             onClick={() => navigate("/pecas")}
           >
             Cancelar
@@ -275,10 +376,11 @@ function PecaForm() {
 
           <button
             type="submit"
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
-            title="Salvar peça"
+            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            title="Salvar peca"
+            disabled={salvando || carregandoOpcoes}
           >
-            Salvar
+            {salvando ? "Salvando..." : "Salvar"}
           </button>
         </div>
       </form>

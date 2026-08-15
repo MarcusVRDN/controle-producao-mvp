@@ -1,6 +1,6 @@
 import { Pencil, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 type Cliente = {
   id: number;
@@ -13,52 +13,60 @@ type Peca = {
   clienteId: number;
   descricao: string;
   material: string;
-  tratamentoTermico: string;
-  tratamentoSuperficial: string;
-  terceirizacao: string;
-  observacao: string;
+  tratamentoTermico: string | null;
+  tratamentoSuperficial: string | null;
+  terceirizacao: string | null;
+  observacao: string | null;
 };
 
 function Pecas() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-
-  useEffect(() => {
-    async function buscarClientes() {
-      const response = await fetch("http://localhost:3001/clientes");
-      if (response.ok) {
-        const clientesApi = await response.json();
-        setClientes(clientesApi);
-      } else {
-        console.error("Erro ao buscar clientes");
-      }
-    }
-    buscarClientes();
-  }, []);
-  const [pecas, setPecas] = useState<Peca[]>([]);
-  useEffect(() => {
-    async function buscarPecas() {
-      const response = await fetch("http://localhost:3001/pecas");
-      if (response.ok) {
-        const pecasApi = await response.json();
-        setPecas(pecasApi);
-      } else {
-        console.error("Erro ao buscar peças");
-      }
-    }
-    buscarPecas();
-  }, []);
-
   const navigate = useNavigate();
-
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [pecas, setPecas] = useState<Peca[]>([]);
+  const [carregandoDados, setCarregandoDados] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState("");
   const [pesquisa, setPesquisa] = useState("");
   const [filtroCliente, setFiltroCliente] = useState("TODOS");
   const [ordenacao, setOrdenacao] = useState("CRESCENTE");
+  const [paginaAtual, setPaginaAtual] = useState(1);
+
+  useEffect(() => {
+    async function carregarDados() {
+      setCarregandoDados(true);
+      setErroCarregamento("");
+
+      try {
+        const [responseClientes, responsePecas] = await Promise.all([
+          fetch("http://localhost:3001/clientes"),
+          fetch("http://localhost:3001/pecas"),
+        ]);
+
+        if (!responseClientes.ok || !responsePecas.ok) {
+          throw new Error("Nao foi possivel carregar as pecas.");
+        }
+
+        const [clientesApi, pecasApi] = await Promise.all([
+          responseClientes.json(),
+          responsePecas.json(),
+        ]);
+
+        setClientes(clientesApi);
+        setPecas(pecasApi);
+      } catch (error) {
+        console.error(error);
+        setErroCarregamento("Nao foi possivel carregar a lista de pecas.");
+      } finally {
+        setCarregandoDados(false);
+      }
+    }
+
+    carregarDados();
+  }, []);
 
   const pecasFiltradas = pecas.filter((peca) => {
     const termo = pesquisa.trim().toLowerCase();
-
-    const correspondePesquisa = peca.codigo.toLowerCase().includes(termo);
-
+    const correspondePesquisa =
+      termo === "" || peca.codigo.toLowerCase().includes(termo);
     const correspondeCliente =
       filtroCliente === "TODOS" || Number(filtroCliente) === peca.clienteId;
 
@@ -73,42 +81,55 @@ function Pecas() {
     return b.codigo.localeCompare(a.codigo);
   });
 
-  const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 10;
-
-  const indiceInicial = (paginaAtual - 1) * 10;
+  const totalPaginas = Math.max(1, Math.ceil(pecasOrdenadas.length / itensPorPagina));
+  const paginaExibida = Math.min(paginaAtual, totalPaginas);
+  const indiceInicial = (paginaExibida - 1) * itensPorPagina;
   const indiceFinal = indiceInicial + itensPorPagina;
-
   const pecasPaginadas = pecasOrdenadas.slice(indiceInicial, indiceFinal);
 
-  const totalPaginas = Math.ceil(pecasOrdenadas.length / itensPorPagina);
+  if (carregandoDados) {
+    return <p className="text-sm text-slate-200">Carregando pecas...</p>;
+  }
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
-        <h1 className="text-lg font-semibold text-white">Peças</h1>
+        <h1 className="text-lg font-semibold text-white">Pecas</h1>
 
         <button
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
           onClick={() => navigate("/pecas/novo")}
         >
           <Plus size={18} />
-          Adicionar Peça
+          Adicionar Peca
         </button>
       </div>
+
+      {erroCarregamento ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {erroCarregamento}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
-          placeholder="Pesquisar por código..."
+          placeholder="Pesquisar por codigo..."
           value={pesquisa}
-          onChange={(event) => setPesquisa(event.target.value)}
+          onChange={(event) => {
+            setPesquisa(event.target.value);
+            setPaginaAtual(1);
+          }}
           className="w-full max-w-md rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
         />
 
         <select
           value={filtroCliente}
-          onChange={(event) => setFiltroCliente(event.target.value)}
+          onChange={(event) => {
+            setFiltroCliente(event.target.value);
+            setPaginaAtual(1);
+          }}
           className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
         >
           <option value="TODOS">Todos os clientes</option>
@@ -122,7 +143,10 @@ function Pecas() {
 
         <select
           value={ordenacao}
-          onChange={(event) => setOrdenacao(event.target.value)}
+          onChange={(event) => {
+            setOrdenacao(event.target.value);
+            setPaginaAtual(1);
+          }}
           className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
         >
           <option value="CRESCENTE">Crescente</option>
@@ -134,17 +158,28 @@ function Pecas() {
         <table className="w-full border-collapse bg-slate-200 text-left text-sm">
           <thead className="bg-slate-300">
             <tr>
-              <th className="border-b border-slate-600 p-3">Código</th>
+              <th className="border-b border-slate-600 p-3">Codigo</th>
               <th className="border-b border-slate-600 p-3">Cliente</th>
-              <th className="border-b border-slate-600 p-3">Descrição</th>
+              <th className="border-b border-slate-600 p-3">Descricao</th>
               <th className="border-b border-slate-600 p-3">Material</th>
               <th className="border-b border-slate-600 p-3 text-center">
-                Ações
+                Acoes
               </th>
             </tr>
           </thead>
 
           <tbody>
+            {pecasPaginadas.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="border-b border-slate-400 p-6 text-center text-slate-700"
+                >
+                  Nenhuma peca encontrada para os filtros atuais.
+                </td>
+              </tr>
+            ) : null}
+
             {pecasPaginadas.map((peca) => (
               <tr
                 key={peca.id}
@@ -152,25 +187,21 @@ function Pecas() {
                 onClick={() => navigate(`./view/${peca.id}`)}
               >
                 <td className="border-b border-slate-400 p-3">{peca.codigo}</td>
-
                 <td className="border-b border-slate-400 p-3">
-                  {clientes.find((cliente) => cliente.id === peca.clienteId)
-                    ?.nome ?? "Cliente não encontrado"}
+                  {clientes.find((cliente) => cliente.id === peca.clienteId)?.nome ??
+                    "Cliente nao encontrado"}
                 </td>
-
                 <td className="border-b border-slate-400 p-3">
                   {peca.descricao}
                 </td>
-
                 <td className="border-b border-slate-400 p-3">
                   {peca.material}
                 </td>
-
                 <td className="border-b border-slate-400 p-3">
                   <div className="flex items-center justify-center gap-3">
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
-                      title="Editar peça"
+                      title="Editar peca"
                       onClick={(event) => {
                         event.stopPropagation();
                         navigate(`/pecas/editar/${peca.id}`);
@@ -184,25 +215,28 @@ function Pecas() {
             ))}
           </tbody>
         </table>
-        <div className="flex items-center justify-between">
+
+        <div className="flex items-center justify-between px-3 py-3">
           <button
-            onClick={() => setPaginaAtual((pagina) => pagina - 1)}
-            disabled={paginaAtual === 1}
+            onClick={() => setPaginaAtual((pagina) => Math.max(1, pagina - 1))}
+            disabled={paginaExibida === 1}
             className="rounded-md bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
           >
             Anterior
           </button>
 
           <span className="text-sm text-slate-300">
-            Página {paginaAtual} de {totalPaginas}
+            Pagina {paginaExibida} de {totalPaginas}
           </span>
 
           <button
-            onClick={() => setPaginaAtual((pagina) => pagina + 1)}
-            disabled={paginaAtual === totalPaginas || totalPaginas === 0}
+            onClick={() =>
+              setPaginaAtual((pagina) => Math.min(totalPaginas, pagina + 1))
+            }
+            disabled={paginaExibida === totalPaginas}
             className="rounded-md bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
           >
-            Próxima
+            Proxima
           </button>
         </div>
       </div>
