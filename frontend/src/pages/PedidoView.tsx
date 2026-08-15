@@ -1,12 +1,13 @@
-import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { getPedidoStatusLabel } from "./pedidoOptions";
 
 type Pedido = {
   id: number;
   codigo: string;
   clienteId: number;
   status: string;
-  observacao: string;
+  observacao: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -16,41 +17,133 @@ type Cliente = {
   nome: string;
 };
 
+async function getResponseErrorMessage(
+  response: Response,
+  fallbackMessage: string,
+) {
+  try {
+    const payload = await response.json();
+
+    if (
+      payload &&
+      typeof payload === "object" &&
+      "error" in payload &&
+      typeof payload.error === "string" &&
+      payload.error.trim() !== ""
+    ) {
+      return payload.error;
+    }
+  } catch {
+    return fallbackMessage;
+  }
+
+  return fallbackMessage;
+}
+
 function PedidoView() {
   const navigate = useNavigate();
   const { id } = useParams();
-
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [cliente, setCliente] = useState<Cliente | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+
   useEffect(() => {
     async function buscarPedido() {
-      const responsePedido = await fetch(`http://localhost:3001/pedidos/${id}`);
-
-      if (!responsePedido.ok) {
-        console.error("Erro ao buscar pedido");
+      if (!id) {
+        setErro("ID do pedido nao informado.");
+        setCarregando(false);
         return;
       }
 
-      const pedidoApi = await responsePedido.json();
-      setPedido(pedidoApi);
+      setCarregando(true);
+      setErro("");
 
-      const responseCliente = await fetch(
-        `http://localhost:3001/clientes/${pedidoApi.clienteId}`,
-      );
+      try {
+        const responsePedido = await fetch(`http://localhost:3001/pedidos/${id}`);
 
-      if (responseCliente.ok) {
+        if (!responsePedido.ok) {
+          throw new Error(
+            await getResponseErrorMessage(
+              responsePedido,
+              "Nao foi possivel carregar o pedido.",
+            ),
+          );
+        }
+
+        const pedidoApi = (await responsePedido.json()) as Pedido;
+        setPedido(pedidoApi);
+
+        const responseCliente = await fetch(
+          `http://localhost:3001/clientes/${pedidoApi.clienteId}`,
+        );
+
+        if (!responseCliente.ok) {
+          throw new Error(
+            await getResponseErrorMessage(
+              responseCliente,
+              "Nao foi possivel carregar o cliente do pedido.",
+            ),
+          );
+        }
+
         const clienteApi = await responseCliente.json();
         setCliente(clienteApi);
-      } else {
-        console.error("Erro ao buscar cliente");
+      } catch (error) {
+        console.error(error);
+        setErro(
+          error instanceof Error
+            ? error.message
+            : "Nao foi possivel carregar o pedido.",
+        );
+      } finally {
+        setCarregando(false);
       }
     }
 
     buscarPedido();
   }, [id]);
 
+  if (carregando) {
+    return <p className="text-sm text-slate-200">Carregando pedido...</p>;
+  }
+
+  if (erro) {
+    return (
+      <section className="flex flex-col gap-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {erro}
+        </div>
+
+        <div>
+          <button
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            onClick={() => navigate("/pedidos")}
+          >
+            Voltar
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   if (!pedido || !cliente) {
-    return <p>Carregando...</p>;
+    return (
+      <section className="flex flex-col gap-4">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+          Nao foi possivel montar os detalhes do pedido.
+        </div>
+
+        <div>
+          <button
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            onClick={() => navigate("/pedidos")}
+          >
+            Voltar
+          </button>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -62,7 +155,7 @@ function PedidoView() {
           </h1>
 
           <p className="text-sm text-slate-300">
-            Consulte as informações completas do pedido.
+            Consulte as informacoes completas do pedido.
           </p>
         </div>
 
@@ -77,7 +170,7 @@ function PedidoView() {
       <div className="w-full max-w-4xl rounded-xl border border-slate-300 bg-white p-6 shadow-md">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <p className="text-sm text-slate-500">Código</p>
+            <p className="text-sm text-slate-500">Codigo</p>
             <p className="font-medium text-slate-900">{pedido.codigo}</p>
           </div>
 
@@ -88,13 +181,15 @@ function PedidoView() {
 
           <div>
             <p className="text-sm text-slate-500">Status</p>
-            <p className="font-medium text-slate-900">{pedido.status}</p>
+            <p className="font-medium text-slate-900">
+              {getPedidoStatusLabel(pedido.status)}
+            </p>
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Observação</p>
+            <p className="text-sm text-slate-500">Observacao</p>
             <p className="font-medium text-slate-900">
-              {pedido.observacao || "-"}
+              {pedido.observacao ?? "-"}
             </p>
           </div>
 
@@ -108,7 +203,7 @@ function PedidoView() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-500">Última atualização</p>
+                <p className="text-sm text-slate-500">Ultima atualizacao</p>
                 <p className="font-medium text-slate-900">
                   {new Date(pedido.updatedAt).toLocaleString("pt-BR")}
                 </p>

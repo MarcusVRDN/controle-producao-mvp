@@ -1,227 +1,243 @@
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  useState,
-  type ChangeEvent,
-  useEffect,
-  type SyntheticEvent,
-} from "react";
+  isSetorProdutivo,
+  setorAtualOptions,
+  setorProdutivoOptions,
+  statusOrdemServicoOptions,
+  type StatusOrdemServico,
+} from "./ordemServicoOptions";
 
 type Peca = {
   id: number;
   codigo: string;
   clienteId: number;
-  descricao: string;
-  material: string;
-  tratamentoTermico: string;
-  tratamentoSuperficial: string;
-  terceirizacao: string;
-  observacao: string;
 };
 
 type Pedido = {
   id: number;
   codigo: string;
   clienteId: number;
-  observacao: string;
-  status: string;
 };
 
-const statusOrdemServico = [
-  { valor: "NAO_INICIADA", texto: "Não iniciada" },
-  { valor: "EM_ANDAMENTO", texto: "Em andamento" },
-  { valor: "CONCLUIDA", texto: "Concluída" },
-  { valor: "CANCELADA", texto: "Cancelada" },
+type OrdemServicoApi = {
+  id: number;
+  numero: number;
+  pedidoId: number;
+  pecaId: number;
+  quantidade: number;
+  horasUnitarias: number;
+  setores: string;
+  dataEntregaSolicitada: string;
+  dataEntregaReal: string | null;
+  observacao: string | null;
+  status: StatusOrdemServico;
+  setorAtual: string | null;
+  possuiRnc: boolean;
+  possuiDevolucao: boolean;
+  dataRnc: string | null;
+  dataDevolucao: string | null;
+};
+
+const setoresDisponiveis = [
+  "Torno Mecanico",
+  "Torno CNC",
+  "Centro de Usinagem",
+  "Mandrilhadora",
+  "Fresa",
+  "Retifica Plana",
+  "Retifica Cilindrica",
 ];
 
-const setoresAtuais = [
-  { valor: "TORNO", texto: "Torno" },
-  { valor: "FRESA", texto: "Fresa" },
-  { valor: "RETIFICA", texto: "Retífica" },
-  { valor: "CENTRO_USINAGEM", texto: "Centro de usinagem" },
-  { valor: "TORNO_CNC", texto: "Torno CNC" },
-  { valor: "MANDRILHADORA", texto: "Mandrilhadora" },
-  { valor: "AJUSTAGEM", texto: "Ajustagem" },
-  { valor: "ROSQUEADEIRA", texto: "Rosqueadeira" },
-  { valor: "QUALIDADE", texto: "Qualidade" },
-  { valor: "LIBERADO", texto: "Liberado" },
-];
+async function getResponseErrorMessage(
+  response: Response,
+  fallbackMessage: string,
+) {
+  try {
+    const payload = await response.json();
+
+    if (
+      payload &&
+      typeof payload === "object" &&
+      "error" in payload &&
+      typeof payload.error === "string" &&
+      payload.error.trim() !== ""
+    ) {
+      return payload.error;
+    }
+  } catch {
+    return fallbackMessage;
+  }
+
+  return fallbackMessage;
+}
+
+function toInputDate(value: string | null) {
+  return value ? value.split("T")[0] : "";
+}
 
 function OrdemServicoEditForm() {
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const [numero, setNumero] = useState(0);
+  const [numero, setNumero] = useState("");
   const [pedidoId, setPedidoId] = useState("");
   const [pecaId, setPecaId] = useState("");
-  const [horasUnitarias, setHorasUnitarias] = useState(0);
-  const [quantidade, setQuantidade] = useState(0);
+  const [horasUnitarias, setHorasUnitarias] = useState("");
+  const [quantidade, setQuantidade] = useState("");
   const [setores, setSetores] = useState<string[]>([]);
   const [dataEntregaSolicitada, setDataEntregaSolicitada] = useState("");
   const [dataEntregaReal, setDataEntregaReal] = useState("");
   const [observacao, setObservacao] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<StatusOrdemServico>("NAO_INICIADA");
   const [setorAtual, setSetorAtual] = useState("");
   const [possuiRnc, setPossuiRnc] = useState(false);
   const [dataRnc, setDataRnc] = useState("");
   const [possuiDevolucao, setPossuiDevolucao] = useState(false);
   const [dataDevolucao, setDataDevolucao] = useState("");
-
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pecas, setPecas] = useState<Peca[]>([]);
+  const [ordemCarregada, setOrdemCarregada] = useState<OrdemServicoApi | null>(
+    null,
+  );
+  const [carregandoDados, setCarregandoDados] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erroCarregamento, setErroCarregamento] = useState("");
+  const [erroSubmit, setErroSubmit] = useState("");
 
-  const horasTotais = horasUnitarias * quantidade;
-
-  useEffect(() => {
-    async function buscarPedidos() {
-      try {
-        const response = await fetch("http://localhost:3001/pedidos");
-
-        if (!response.ok) {
-          throw new Error("Erro ao buscar pedidos");
-        }
-
-        const pedidosApi = await response.json();
-        setPedidos(pedidosApi);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    buscarPedidos();
-  }, []);
-
-  useEffect(() => {
-    async function buscarPecas() {
-      try {
-        const response = await fetch("http://localhost:3001/pecas");
-
-        if (!response.ok) {
-          throw new Error("Erro ao buscar peças");
-        }
-
-        const pecasApi = await response.json();
-        setPecas(pecasApi);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    buscarPecas();
-  }, []);
+  const horasTotais =
+    (Number(horasUnitarias) || 0) * (Number(quantidade) || 0);
+  const pedidoSelecionado = pedidos.find(
+    (pedido) => pedido.id === Number(pedidoId),
+  );
+  const pecasDisponiveis = pedidoSelecionado
+    ? pecas.filter((peca) => peca.clienteId === pedidoSelecionado.clienteId)
+    : [];
+  const podeEditarDataEntregaReal =
+    ordemCarregada?.status === "CONCLUIDA" && status === "CONCLUIDA";
+  const valorSetorAtual =
+    status === "EM_ANDAMENTO"
+      ? isSetorProdutivo(setorAtual)
+        ? setorAtual
+        : ""
+      : status === "CONCLUIDA"
+        ? "LIBERADO"
+        : "";
 
   useEffect(() => {
-    async function buscarOrdemServico() {
+    async function carregarDados() {
       if (!id) {
-        console.error("ID da ordem de serviço não informado");
+        setErroCarregamento("ID da ordem de servico nao informado.");
+        setCarregandoDados(false);
         return;
       }
 
-      try {
-        const response = await fetch(
-          `http://localhost:3001/ordensServico/${id}`,
-        );
+      setCarregandoDados(true);
+      setErroCarregamento("");
 
-        if (!response.ok) {
-          throw new Error("Erro ao buscar ordem de serviço");
+      try {
+        const [responsePedidos, responsePecas, responseOrdemServico] =
+          await Promise.all([
+            fetch("http://localhost:3001/pedidos"),
+            fetch("http://localhost:3001/pecas"),
+            fetch(`http://localhost:3001/ordensServico/${id}`),
+          ]);
+
+        if (!responseOrdemServico.ok) {
+          throw new Error(
+            await getResponseErrorMessage(
+              responseOrdemServico,
+              "Nao foi possivel carregar a ordem de servico.",
+            ),
+          );
         }
 
-        const ordemServicoApi = await response.json();
+        if (!responsePedidos.ok || !responsePecas.ok) {
+          throw new Error(
+            "Nao foi possivel carregar os pedidos e as pecas da ordem de servico.",
+          );
+        }
 
-        setNumero(ordemServicoApi.numero);
+        const [pedidosApi, pecasApi, ordemServicoApi] = await Promise.all([
+          responsePedidos.json(),
+          responsePecas.json(),
+          responseOrdemServico.json(),
+        ]);
+
+        setPedidos(pedidosApi);
+        setPecas(pecasApi);
+        setOrdemCarregada(ordemServicoApi);
+        setNumero(String(ordemServicoApi.numero));
         setPedidoId(String(ordemServicoApi.pedidoId));
         setPecaId(String(ordemServicoApi.pecaId));
-        setHorasUnitarias(ordemServicoApi.horasUnitarias);
-        setQuantidade(ordemServicoApi.quantidade);
+        setHorasUnitarias(String(ordemServicoApi.horasUnitarias));
+        setQuantidade(String(ordemServicoApi.quantidade));
         setSetores(
-          ordemServicoApi.setores ? ordemServicoApi.setores.split(", ") : [],
+          ordemServicoApi.setores
+            ? ordemServicoApi.setores
+                .split(",")
+                .map((setor: string) => setor.trim())
+                .filter(Boolean)
+            : [],
         );
         setDataEntregaSolicitada(
-          ordemServicoApi.dataEntregaSolicitada.split("T")[0],
+          toInputDate(ordemServicoApi.dataEntregaSolicitada),
         );
+        setDataEntregaReal(toInputDate(ordemServicoApi.dataEntregaReal));
         setObservacao(ordemServicoApi.observacao ?? "");
         setStatus(ordemServicoApi.status);
         setSetorAtual(ordemServicoApi.setorAtual ?? "");
+        setPossuiRnc(ordemServicoApi.possuiRnc);
+        setDataRnc(toInputDate(ordemServicoApi.dataRnc));
+        setPossuiDevolucao(ordemServicoApi.possuiDevolucao);
+        setDataDevolucao(toInputDate(ordemServicoApi.dataDevolucao));
       } catch (error) {
         console.error(error);
+        setErroCarregamento(
+          error instanceof Error
+            ? error.message
+            : "Nao foi possivel carregar a ordem de servico.",
+        );
+      } finally {
+        setCarregandoDados(false);
       }
     }
 
-    buscarOrdemServico();
+    carregarDados();
   }, [id]);
 
-  async function onHandleSubmit(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!id) {
-      console.error("ID da ordem de serviço não informado");
-      return;
-    }
-
-    const ordemServico = {
-      numero,
-      pedidoId: Number(pedidoId),
-      pecaId: Number(pecaId),
-      horasUnitarias,
-      quantidade,
-      horasTotais,
-      setores: setores.join(", "),
-
-      dataEntregaSolicitada: new Date(
-        `${dataEntregaSolicitada}T00:00:00`,
-      ).toISOString(),
-
-      dataEntregaReal: dataEntregaReal
-        ? new Date(`${dataEntregaReal}T00:00:00`).toISOString()
-        : null,
-
-      observacao,
-      status,
-      setorAtual: setorAtual || null,
-
-      possuiRnc,
-      dataRnc:
-        possuiRnc && dataRnc
-          ? new Date(`${dataRnc}T00:00:00`).toISOString()
-          : null,
-
-      possuiDevolucao,
-      dataDevolucao:
-        possuiDevolucao && dataDevolucao
-          ? new Date(`${dataDevolucao}T00:00:00`).toISOString()
-          : null,
-    };
-    try {
-      const response = await fetch(
-        `http://localhost:3001/ordensServico/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(ordemServico),
-        },
-      );
-
-      if (!response.ok) {
-        const erro = await response.json();
-        console.error(erro);
-        return;
-      }
-
-      const ordemAtualizada = await response.json();
-      console.log(ordemAtualizada);
-      navigate("/ordens-servico");
-    } catch (error) {
-      console.error("Erro ao atualizar ordem de serviço", error);
-    }
-  }
-
   function onHorasUnitariasInputChanged(event: ChangeEvent<HTMLInputElement>) {
-    setHorasUnitarias(Number(event.target.value));
+    setHorasUnitarias(event.target.value);
   }
 
   function onQuantidadeInputChanged(event: ChangeEvent<HTMLInputElement>) {
-    setQuantidade(Number(event.target.value));
+    setQuantidade(event.target.value);
+  }
+
+  function onPedidoChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextPedidoId = event.target.value;
+    setPedidoId(nextPedidoId);
+
+    if (!nextPedidoId) {
+      setPecaId("");
+      return;
+    }
+
+    const nextPedido = pedidos.find(
+      (pedido) => pedido.id === Number(nextPedidoId),
+    );
+
+    if (!nextPedido || !pecaId) {
+      return;
+    }
+
+    const pecaSelecionada = pecas.find((peca) => peca.id === Number(pecaId));
+
+    if (
+      pecaSelecionada &&
+      pecaSelecionada.clienteId !== nextPedido.clienteId
+    ) {
+      setPecaId("");
+    }
   }
 
   function onSetorChange(setor: string) {
@@ -234,38 +250,266 @@ function OrdemServicoEditForm() {
     });
   }
 
+  function onStatusChange(event: ChangeEvent<HTMLSelectElement>) {
+    setStatus(event.target.value as StatusOrdemServico);
+    setErroSubmit("");
+  }
+
+  async function onHandleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErroSubmit("");
+
+    if (!id || !ordemCarregada) {
+      setErroSubmit("A ordem de servico nao foi carregada corretamente.");
+      return;
+    }
+
+    const numeroNormalizado = Number(numero);
+    const pedidoIdNormalizado = Number(pedidoId);
+    const pecaIdNormalizado = Number(pecaId);
+    const horasUnitariasNormalizadas = Number(horasUnitarias);
+    const quantidadeNormalizada = Number(quantidade);
+    const dataEntrega = new Date(`${dataEntregaSolicitada}T00:00:00`);
+
+    if (!Number.isInteger(numeroNormalizado) || numeroNormalizado <= 0) {
+      setErroSubmit("Informe um numero de OS inteiro maior que zero.");
+      return;
+    }
+
+    if (!Number.isInteger(pedidoIdNormalizado) || pedidoIdNormalizado <= 0) {
+      setErroSubmit("Selecione um pedido valido.");
+      return;
+    }
+
+    if (!Number.isInteger(pecaIdNormalizado) || pecaIdNormalizado <= 0) {
+      setErroSubmit("Selecione uma peca valida.");
+      return;
+    }
+
+    if (
+      !Number.isFinite(horasUnitariasNormalizadas) ||
+      horasUnitariasNormalizadas <= 0
+    ) {
+      setErroSubmit("Informe horas unitarias maiores que zero.");
+      return;
+    }
+
+    if (
+      !Number.isInteger(quantidadeNormalizada) ||
+      quantidadeNormalizada <= 0
+    ) {
+      setErroSubmit("Informe uma quantidade inteira maior que zero.");
+      return;
+    }
+
+    if (setores.length === 0) {
+      setErroSubmit("Selecione pelo menos um setor.");
+      return;
+    }
+
+    if (Number.isNaN(dataEntrega.getTime())) {
+      setErroSubmit("Informe uma data de entrega solicitada valida.");
+      return;
+    }
+
+    const pedidoAtual = pedidos.find((pedido) => pedido.id === pedidoIdNormalizado);
+    const pecaAtual = pecas.find((peca) => peca.id === pecaIdNormalizado);
+
+    if (!pedidoAtual) {
+      setErroSubmit("O pedido selecionado nao foi encontrado.");
+      return;
+    }
+
+    if (!pecaAtual) {
+      setErroSubmit("A peca selecionada nao foi encontrada.");
+      return;
+    }
+
+    if (pedidoAtual.clienteId !== pecaAtual.clienteId) {
+      setErroSubmit(
+        "Pedido e peca precisam pertencer ao mesmo cliente para a OS.",
+      );
+      return;
+    }
+
+    if (status === "EM_ANDAMENTO" && !isSetorProdutivo(setorAtual)) {
+      setErroSubmit(
+        "Ordens em andamento precisam de um setor produtivo valido.",
+      );
+      return;
+    }
+
+    if (possuiRnc && !dataRnc) {
+      setErroSubmit("Informe a data da RNC.");
+      return;
+    }
+
+    if (possuiDevolucao && !dataDevolucao) {
+      setErroSubmit("Informe a data da devolucao.");
+      return;
+    }
+
+    const observacaoNormalizada = observacao.trim();
+    const ordemServico: Record<string, unknown> = {
+      numero: numeroNormalizado,
+      pedidoId: pedidoIdNormalizado,
+      pecaId: pecaIdNormalizado,
+      horasUnitarias: horasUnitariasNormalizadas,
+      quantidade: quantidadeNormalizada,
+      setores: setores.join(", "),
+      dataEntregaSolicitada: dataEntrega.toISOString(),
+      status,
+      possuiRnc,
+      possuiDevolucao,
+    };
+
+    if (observacaoNormalizada !== "") {
+      ordemServico.observacao = observacaoNormalizada;
+    }
+
+    if (status === "EM_ANDAMENTO") {
+      ordemServico.setorAtual = setorAtual;
+    }
+
+    if (
+      status === "CONCLUIDA" &&
+      ordemCarregada.status === "CONCLUIDA"
+    ) {
+      if (!dataEntregaReal) {
+        setErroSubmit(
+          "Ordens ja concluidas precisam manter uma data real de entrega.",
+        );
+        return;
+      }
+
+      const dataEntregaRealNormalizada = new Date(
+        `${dataEntregaReal}T00:00:00`,
+      );
+
+      if (Number.isNaN(dataEntregaRealNormalizada.getTime())) {
+        setErroSubmit("Informe uma data real de entrega valida.");
+        return;
+      }
+
+      ordemServico.dataEntregaReal = dataEntregaRealNormalizada.toISOString();
+    }
+
+    if (possuiRnc) {
+      const dataRncNormalizada = new Date(`${dataRnc}T00:00:00`);
+
+      if (Number.isNaN(dataRncNormalizada.getTime())) {
+        setErroSubmit("Informe uma data da RNC valida.");
+        return;
+      }
+
+      ordemServico.dataRnc = dataRncNormalizada.toISOString();
+    } else {
+      ordemServico.dataRnc = null;
+    }
+
+    if (possuiDevolucao) {
+      const dataDevolucaoNormalizada = new Date(`${dataDevolucao}T00:00:00`);
+
+      if (Number.isNaN(dataDevolucaoNormalizada.getTime())) {
+        setErroSubmit("Informe uma data de devolucao valida.");
+        return;
+      }
+
+      ordemServico.dataDevolucao = dataDevolucaoNormalizada.toISOString();
+    } else {
+      ordemServico.dataDevolucao = null;
+    }
+
+    setSalvando(true);
+
+    try {
+      const response = await fetch(`http://localhost:3001/ordensServico/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(ordemServico),
+      });
+
+      if (!response.ok) {
+        let fallbackMessage =
+          "Nao foi possivel salvar as alteracoes da ordem de servico.";
+
+        if (response.status === 404) {
+          fallbackMessage =
+            "A ordem de servico, o pedido ou a peca nao foram encontrados.";
+        }
+
+        if (response.status === 409) {
+          fallbackMessage = "Ja existe uma ordem de servico com esse numero.";
+        }
+
+        const message = await getResponseErrorMessage(response, fallbackMessage);
+        setErroSubmit(message);
+        return;
+      }
+
+      navigate("/ordens-servico");
+    } catch (error) {
+      console.error(error);
+      setErroSubmit(
+        "Nao foi possivel conectar com a API para atualizar a ordem de servico.",
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  if (carregandoDados) {
+    return <p className="text-sm text-slate-200">Carregando ordem de servico...</p>;
+  }
+
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-white">
-          Editar ordem de serviço
+          Editar ordem de servico
         </h1>
 
         <p className="text-sm text-slate-300">Edite os campos desejados.</p>
       </div>
 
+      {erroCarregamento ? (
+        <div className="w-full max-w-3xl rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {erroCarregamento}
+        </div>
+      ) : null}
+
       <form
         className="flex w-full max-w-3xl flex-col gap-6 rounded-xl border border-slate-300 bg-white p-6 shadow-md"
         onSubmit={onHandleSubmit}
       >
+        {erroSubmit ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {erroSubmit}
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2">
             <label
               htmlFor="numero"
               className="text-sm font-medium text-slate-700"
             >
-              Número
+              Numero
             </label>
 
             <input
               id="numero"
               name="numero"
               type="number"
+              min="1"
+              step="1"
               value={numero}
               onFocus={(event) => event.target.select()}
-              onChange={(event) => setNumero(Number(event.target.value))}
+              onChange={(event) => setNumero(event.target.value)}
               required
-              placeholder="Digite o número da O.S...."
+              placeholder="Digite o numero da O.S."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -283,11 +527,12 @@ function OrdemServicoEditForm() {
               name="pedidoId"
               value={pedidoId}
               required
-              onChange={(event) => setPedidoId(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+              disabled={salvando}
+              onChange={onPedidoChange}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100"
             >
               <option value="" disabled>
-                Escolha o pedido...
+                Escolha o pedido
               </option>
 
               {pedidos.map((pedido) => (
@@ -303,7 +548,7 @@ function OrdemServicoEditForm() {
               htmlFor="pecaId"
               className="text-sm font-medium text-slate-700"
             >
-              Peça
+              Peca
             </label>
 
             <select
@@ -311,19 +556,29 @@ function OrdemServicoEditForm() {
               name="pecaId"
               value={pecaId}
               required
+              disabled={!pedidoSelecionado || salvando}
               onChange={(event) => setPecaId(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100"
             >
               <option value="" disabled>
-                Escolha a peça...
+                {!pedidoSelecionado
+                  ? "Escolha primeiro o pedido"
+                  : "Escolha a peca"}
               </option>
 
-              {pecas.map((peca) => (
+              {pecasDisponiveis.map((peca) => (
                 <option key={peca.id} value={peca.id}>
                   {peca.codigo}
                 </option>
               ))}
             </select>
+
+            {pedidoSelecionado ? (
+              <p className="text-xs text-slate-500">
+                A lista de pecas foi filtrada para o cliente do pedido
+                selecionado.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -333,7 +588,7 @@ function OrdemServicoEditForm() {
               htmlFor="horasUnitarias"
               className="text-sm font-medium text-slate-700"
             >
-              Horas Unitárias
+              Horas unitarias
             </label>
 
             <input
@@ -341,8 +596,8 @@ function OrdemServicoEditForm() {
               name="horasUnitarias"
               type="number"
               step="0.01"
-              min="0"
-              placeholder="Digite o tempo por peça..."
+              min="0.01"
+              placeholder="Digite o tempo por peca"
               required
               value={horasUnitarias}
               onChange={onHorasUnitariasInputChanged}
@@ -365,7 +620,7 @@ function OrdemServicoEditForm() {
               type="number"
               min="1"
               step="1"
-              placeholder="Digite a quantidade..."
+              placeholder="Digite a quantidade"
               required
               value={quantidade}
               onChange={onQuantidadeInputChanged}
@@ -379,14 +634,14 @@ function OrdemServicoEditForm() {
               htmlFor="horasTotais"
               className="text-sm font-medium text-slate-700"
             >
-              Horas Totais
+              Horas totais
             </label>
 
             <input
               id="horasTotais"
               name="horasTotais"
               type="number"
-              value={horasTotais}
+              value={Number.isFinite(horasTotais) ? horasTotais : 0}
               readOnly
               className="w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2.5 text-slate-900 outline-none"
             />
@@ -397,68 +652,17 @@ function OrdemServicoEditForm() {
           <p className="text-sm font-medium text-slate-700">Setores</p>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Torno Mecânico")}
-                onChange={() => onSetorChange("Torno Mecânico")}
-              />
-              Torno Mecânico
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Torno CNC")}
-                onChange={() => onSetorChange("Torno CNC")}
-              />
-              Torno CNC
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Centro de Usinagem")}
-                onChange={() => onSetorChange("Centro de Usinagem")}
-              />
-              Centro de Usinagem
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Mandrilhadora")}
-                onChange={() => onSetorChange("Mandrilhadora")}
-              />
-              Mandrilhadora
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Fresa")}
-                onChange={() => onSetorChange("Fresa")}
-              />
-              Fresa
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Retífica Plana")}
-                onChange={() => onSetorChange("Retífica Plana")}
-              />
-              Retífica Plana
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={setores.includes("Retífica Cilíndrica")}
-                onChange={() => onSetorChange("Retífica Cilíndrica")}
-              />
-              Retífica Cilíndrica
-            </label>
+            {setoresDisponiveis.map((setor) => (
+              <label key={setor} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={setores.includes(setor)}
+                  disabled={salvando}
+                  onChange={() => onSetorChange(setor)}
+                />
+                {setor}
+              </label>
+            ))}
           </div>
         </div>
 
@@ -480,12 +684,13 @@ function OrdemServicoEditForm() {
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
+
         <div className="flex flex-col gap-2">
           <label
             htmlFor="dataEntregaReal"
             className="text-sm font-medium text-slate-700"
           >
-            Data de entrega real
+            Data real de entrega
           </label>
 
           <input
@@ -494,23 +699,32 @@ function OrdemServicoEditForm() {
             type="date"
             value={dataEntregaReal}
             onChange={(event) => setDataEntregaReal(event.target.value)}
-            required
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            disabled={!podeEditarDataEntregaReal || salvando}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100"
           />
+
+          <p className="text-xs text-slate-500">
+            {podeEditarDataEntregaReal
+              ? "Use este campo apenas para correcao historica da data real de entrega."
+              : status === "CONCLUIDA"
+                ? "Na primeira conclusao, a data real sera registrada automaticamente pelo backend."
+                : "Ordens nao concluidas nao permitem editar a data real de entrega."}
+          </p>
         </div>
+
         <div className="flex flex-col gap-2">
           <label
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observação
+            Observacao
           </label>
 
           <textarea
             id="observacao"
             name="observacao"
             rows={4}
-            placeholder="Digite as observações..."
+            placeholder="Digite as observacoes"
             value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
@@ -530,13 +744,14 @@ function OrdemServicoEditForm() {
               id="status"
               name="status"
               value={status}
-              onChange={(event) => setStatus(event.target.value)}
+              onChange={onStatusChange}
               required
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+              disabled={salvando}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100"
             >
-              {statusOrdemServico.map((opcaoStatus) => (
-                <option key={opcaoStatus.valor} value={opcaoStatus.valor}>
-                  {opcaoStatus.texto}
+              {statusOrdemServicoOptions.map((opcaoStatus) => (
+                <option key={opcaoStatus.value} value={opcaoStatus.value}>
+                  {opcaoStatus.label}
                 </option>
               ))}
             </select>
@@ -553,18 +768,42 @@ function OrdemServicoEditForm() {
             <select
               id="setorAtual"
               name="setorAtual"
-              value={setorAtual}
+              value={valorSetorAtual}
               onChange={(event) => setSetorAtual(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+              disabled={status !== "EM_ANDAMENTO" || salvando}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100"
             >
-              <option value="">Sem setor atual</option>
+              {status === "CONCLUIDA" ? (
+                <option value="LIBERADO">
+                  {
+                    setorAtualOptions.find((setor) => setor.value === "LIBERADO")
+                      ?.label
+                  }
+                </option>
+              ) : null}
 
-              {setoresAtuais.map((opcaoSetor) => (
-                <option key={opcaoSetor.valor} value={opcaoSetor.valor}>
-                  {opcaoSetor.texto}
+              {status !== "CONCLUIDA" ? (
+                <option value="">
+                  {status === "EM_ANDAMENTO"
+                    ? "Escolha um setor produtivo"
+                    : "Sem setor atual"}
+                </option>
+              ) : null}
+
+              {setorProdutivoOptions.map((opcaoSetor) => (
+                <option key={opcaoSetor.value} value={opcaoSetor.value}>
+                  {opcaoSetor.label}
                 </option>
               ))}
             </select>
+
+            <p className="text-xs text-slate-500">
+              {status === "EM_ANDAMENTO"
+                ? "Selecione um setor produtivo valido para manter a OS em andamento."
+                : status === "CONCLUIDA"
+                  ? "Ordens concluidas permanecem no setor Liberado."
+                  : "Ordens nao iniciadas e canceladas ficam sem setor atual."}
+            </p>
           </div>
         </div>
 
@@ -572,13 +811,15 @@ function OrdemServicoEditForm() {
           <input
             type="checkbox"
             checked={possuiRnc}
+            disabled={salvando}
             onChange={(event) => setPossuiRnc(event.target.checked)}
           />
           Possui RNC?
         </label>
-        {possuiRnc && (
-          <div>
-            <label className="mb-1 block text-sm font-medium">
+
+        {possuiRnc ? (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">
               Data da RNC
             </label>
 
@@ -589,19 +830,22 @@ function OrdemServicoEditForm() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </div>
-        )}
+        ) : null}
+
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={possuiDevolucao}
+            disabled={salvando}
             onChange={(event) => setPossuiDevolucao(event.target.checked)}
           />
-          Possui Devolução
+          Possui devolucao
         </label>
-        {possuiDevolucao && (
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Data da Devolução
+
+        {possuiDevolucao ? (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">
+              Data da devolucao
             </label>
 
             <input
@@ -611,12 +855,14 @@ function OrdemServicoEditForm() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </div>
-        )}
+        ) : null}
+
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
           <button
             type="button"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             title="Cancelar"
+            disabled={salvando}
             onClick={() => navigate("/ordens-servico")}
           >
             Cancelar
@@ -624,10 +870,11 @@ function OrdemServicoEditForm() {
 
           <button
             type="submit"
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
-            title="Salvar alterações"
+            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            title="Salvar alteracoes"
+            disabled={salvando || !!erroCarregamento}
           >
-            Salvar
+            {salvando ? "Salvando..." : "Salvar"}
           </button>
         </div>
       </form>
