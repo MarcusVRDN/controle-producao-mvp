@@ -17,10 +17,13 @@ import PecaView from "./pages/PecaView";
 import PedidoView from "./pages/PedidoView";
 import OrdemServicoView from "./pages/OrdemServicoView";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
 
 function App() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+
       <Route element={<Layout />}>
         <Route index element={<Navigate to= "/dashboard" replace/>}/>
         <Route path="/dashboard" element={<Dashboard />}/>
