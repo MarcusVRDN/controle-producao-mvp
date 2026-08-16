@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { create , findAll, findById, remove, update } from "../controllers/pedido.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+router.use(authMiddleware);
 
 router.post (
     "/", create
