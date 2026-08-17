@@ -1,129 +1,164 @@
 # 🏭 Controle de Produção
 
-Aplicação web full stack para gerenciamento e acompanhamento de **clientes, peças, pedidos e ordens de serviço** em um ambiente de produção industrial.
+Aplicação web full stack para centralizar o acompanhamento de **clientes, peças, pedidos e ordens de serviço** em um fluxo de produção industrial.
 
-O sistema centraliza informações que normalmente estariam distribuídas entre planilhas e controles separados, permitindo acompanhar o andamento da produção, entregas, atrasos e indicadores operacionais em uma única interface.
+O projeto foi desenvolvido a partir de problemas encontrados em ambientes produtivos, onde informações importantes muitas vezes ficam distribuídas entre planilhas, anotações e controles separados.
 
-**Versão atual: v1.1.0**
+A aplicação reúne esses dados em uma única interface, permitindo acompanhar o andamento da produção, consultar indicadores e manter a rastreabilidade básica das ordens de serviço.
 
-![Dashboard do Controle de Produção](docs/screenshots/dashboard.png)
-
----
-
-## 💡 Motivação
-
-O projeto surgiu a partir da observação de processos reais de controle de produção, nos quais informações sobre pedidos, peças, prazos e andamento da fabricação podem acabar distribuídas entre diferentes controles.
-
-A proposta foi transformar esse problema em uma aplicação full stack, utilizando o projeto tanto para experimentar uma solução para o domínio quanto para aplicar conceitos de desenvolvimento de software.
-
-Mais do que desenvolver um CRUD, o objetivo foi modelar relações e regras existentes em um fluxo produtivo real.
+> **Status:** MVP funcional  
+> **Autenticação:** JWT  
+> **Frontend:** React + TypeScript  
+> **Backend:** Node.js + Express + TypeScript  
+> **Banco de dados:** PostgreSQL
 
 ---
 
-## ✨ Principais funcionalidades
+## 📸 Screenshots
 
 ### 📊 Dashboard
 
-O dashboard oferece uma visão consolidada da produção e permite navegar entre diferentes meses.
+O dashboard apresenta uma visão geral da produção, incluindo entregas, pendências, atrasos e indicadores de qualidade.
 
-Atualmente apresenta:
+![Dashboard](./docs/tela-dashboard1.png)
 
-- ordens de serviço pendentes;
-- entregas previstas no mês;
-- índice de atraso;
-- índice de RNC;
-- índice de devolução;
-- entregas prioritárias;
-- ordens próximas do prazo ou já atrasadas.
-
-### 👥 Clientes
-
-- Cadastro, edição e visualização;
-- Pesquisa por nome;
-- Filtro por clientes ativos/inativos;
-- Ordenação alfabética;
-- Paginação.
-
-### ⚙️ Peças
-
-- Cadastro, edição e visualização;
-- Associação da peça a um cliente;
-- Informações de material e descrição;
-- Tratamentos térmicos e superficiais;
-- Terceirização e observações;
-- Pesquisa por código;
-- Filtro por cliente;
-- Ordenação e paginação.
-
-### 📦 Pedidos
-
-- Cadastro, edição e visualização;
-- Associação a clientes;
-- Controle de status;
-- Pesquisa por código;
-- Filtros por cliente e status;
-- Ordenação e paginação.
+![Dashboard - Indicadores](./docs/tela-dashboard2.png)
 
 ### 🏭 Ordens de Serviço
 
-- Cadastro, edição e visualização;
-- Associação entre pedido e peça;
-- Controle de quantidade e horas de produção;
-- Cálculo automático de horas totais no backend;
-- Controle de status e setor atual;
-- Registro de RNC e devolução;
-- Controle de datas previstas e realizadas;
-- Pesquisa por número da OS ou código da peça;
-- Filtros por cliente, status e setor;
-- Ordenação e paginação;
-- Alteração rápida de status e setor pela listagem.
+A listagem permite pesquisar, filtrar e acompanhar rapidamente o status e o setor atual das ordens de serviço.
+
+![Ordens de Serviço](./docs/tela-ordem-servico.png)
+
+### 📝 Cadastro de Ordem de Serviço
+
+![Formulário de Ordem de Serviço](./docs/tela-ordem-servico-form.png)
+
+<details>
+<summary>📷 Ver outras telas</summary>
+
+### 👥 Clientes
+
+![Clientes](./docs/tela-clientes.png)
+
+### ⚙️ Peças
+
+![Peças](./docs/tela-pecas.png)
+
+### 📦 Pedidos
+
+![Pedidos](./docs/tela-pedidos.png)
+
+### 🔐 Login
+
+![Login](./docs/tela-login.png)
+
+</details>
 
 ---
 
-## 🖥️ Interface
+## ✨ Funcionalidades
 
-### Ordens de Serviço
+### 🔐 Autenticação
 
-![Listagem de Ordens de Serviço](docs/screenshots/ordens-servico.png)
+- Cadastro de usuário
+- Login
+- Autenticação utilizando JWT
+- Proteção das rotas da aplicação
+- Envio automático do token nas requisições autenticadas
 
-### Cadastro de Ordem de Serviço
+### 👥 Clientes
 
-![Formulário de Ordem de Serviço](docs/screenshots/ordem-servico-form.png)
+- Cadastro
+- Listagem
+- Visualização
+- Edição
+- Pesquisa
+- Controle de clientes ativos
 
-> Os screenshots devem ser adicionados em `docs/screenshots/`.
+### ⚙️ Peças
+
+- Cadastro
+- Listagem
+- Visualização
+- Edição
+- Associação da peça a um cliente
+- Pesquisa e filtros
+
+### 📦 Pedidos
+
+- Cadastro
+- Listagem
+- Visualização
+- Edição
+- Associação do pedido a um cliente
+- Controle de status
+- Pesquisa, filtros e ordenação
+- Paginação
+
+### 🏭 Ordens de Serviço
+
+- Cadastro
+- Listagem
+- Visualização
+- Edição
+- Associação entre pedido e peça
+- Controle de quantidade e horas de produção
+- Controle da data de entrega solicitada
+- Registro da data real de entrega
+- Controle de status
+- Acompanhamento do setor atual
+- Registro de RNC
+- Registro de devolução
+- Alteração rápida de status e setor pela listagem
+- Pesquisa por número ou código da peça
+- Filtros por cliente, status e setor
+- Ordenação
+- Paginação
 
 ---
 
-## 🛠️ Tecnologias
+## 📊 Dashboard
 
-### Frontend
+O dashboard consolida informações das ordens de serviço para facilitar o acompanhamento da produção.
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Recharts
-- Lucide React
+Entre os indicadores apresentados estão:
 
-### Backend
+- ordens pendentes;
+- entregas previstas no mês;
+- entregas realizadas;
+- índice de atrasos;
+- índice de RNC;
+- índice de devoluções;
+- próximas entregas.
 
-- Node.js
-- Express
-- TypeScript
-- Prisma ORM
-
-### Banco de dados e infraestrutura
-
-- PostgreSQL
-- Docker
-- Docker Compose
+Os indicadores são calculados a partir dos dados cadastrados nas ordens de serviço e permitem visualizar rapidamente a situação atual da produção.
 
 ---
 
-## 🧱 Arquitetura
+## 📋 Regras de Negócio
 
-O backend foi organizado em camadas com responsabilidades separadas:
+Algumas das principais regras implementadas no sistema:
+
+- uma peça pertence a um cliente;
+- um pedido pertence a um cliente;
+- uma ordem de serviço relaciona um pedido e uma peça;
+- pedido e peça utilizados em uma ordem de serviço devem pertencer ao mesmo cliente;
+- ordens concluídas recebem uma data real de entrega;
+- ao concluir uma ordem, seu setor atual passa para `LIBERADO`;
+- RNC e devoluções podem ser registrados para acompanhamento dos indicadores de qualidade.
+
+A documentação mais detalhada das regras de negócio está disponível em:
+
+[`docs/regras-negocio.md`](./docs/regras-negocio.md)
+
+---
+
+## 🏗️ Arquitetura
+
+O projeto é dividido em frontend, backend e banco de dados.
+
+No backend, foi utilizada uma separação em camadas:
 
 ```text
 Request
@@ -136,217 +171,62 @@ Service
    ↓
 Repository
    ↓
-Prisma
+Prisma ORM
    ↓
 PostgreSQL
 ```
 
 ### Controller
 
-Responsável pela camada HTTP:
-
-- recebe as requisições;
-- interpreta parâmetros;
-- chama os services;
-- retorna os códigos HTTP adequados.
+Responsável por receber as requisições HTTP, encaminhar os dados para a camada de serviço e retornar as respostas da API.
 
 ### Service
 
-Concentra as principais regras de negócio:
-
-- validação dos dados;
-- normalização dos payloads;
-- validação de relacionamentos;
-- prevenção de estados inconsistentes.
+Concentra as regras de negócio e validações da aplicação.
 
 ### Repository
 
-Responsável pelo acesso e persistência dos dados através do Prisma.
+Responsável pelo acesso e persistência dos dados através do Prisma ORM.
 
-Essa separação evita concentrar regras de negócio diretamente nas rotas ou nas consultas ao banco.
+Uma descrição mais detalhada da arquitetura está disponível em:
 
----
-
-## 🔗 Modelo do domínio
-
-As quatro principais entidades do sistema são:
-
-```text
-Cliente
- ├── Peças
- └── Pedidos
-       │
-       └────┐
-            │
-Peça ───────┴── Ordem de Serviço
-```
-
-### Cliente
-
-Representa a empresa para a qual os serviços são realizados.
-
-Um cliente pode possuir diversas peças e pedidos.
-
-### Peça
-
-Representa uma peça cadastrada para determinado cliente.
-
-Cada peça pode possuir informações como:
-
-- código;
-- descrição;
-- material;
-- tratamento térmico;
-- tratamento superficial;
-- terceirização.
-
-### Pedido
-
-Representa um pedido realizado por um cliente e possui controle de status.
-
-### Ordem de Serviço
-
-É a principal entidade operacional do sistema.
-
-Relaciona um **Pedido** a uma **Peça** e armazena informações necessárias para acompanhar sua fabricação e entrega.
+[`docs/arquitetura.md`](./docs/arquitetura.md)
 
 ---
 
-## ⚙️ Principais regras de negócio
+## 🛠️ Tecnologias
 
-Além das operações CRUD, o backend possui regras para manter a consistência dos dados.
+### Frontend
 
-### Pedido × Peça
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Lucide React
 
-Uma Ordem de Serviço só pode utilizar uma peça pertencente ao mesmo cliente do pedido.
+### Backend
 
-O frontend filtra as opções para melhorar a experiência do usuário, mas a regra também é validada pelo backend.
+- Node.js
+- Express
+- TypeScript
+- JWT
+- Prisma ORM
 
-### Horas de produção
+### Banco de Dados
 
-As horas totais são calculadas no backend:
+- PostgreSQL
 
-```text
-horasTotais = quantidade × horasUnitarias
-```
+### Ferramentas
 
-Dessa forma, o valor persistido não depende de um cálculo enviado pelo frontend.
-
-### Status da Ordem de Serviço
-
-O fluxo considera quatro estados principais:
-
-```text
-NAO_INICIADA
-      ↓
-EM_ANDAMENTO
-      ↓
-CONCLUIDA
-```
-
-Além do estado:
-
-```text
-CANCELADA
-```
-
-Algumas regras aplicadas:
-
-- `NAO_INICIADA` não possui setor atual nem data real de entrega;
-- `EM_ANDAMENTO` exige um setor produtivo;
-- `CONCLUIDA` define automaticamente o setor como `LIBERADO`;
-- na primeira conclusão, a data real de entrega é registrada automaticamente;
-- uma data real de entrega pode posteriormente ser corrigida em uma OS já concluída;
-- ao reabrir uma OS, a data real de entrega é removida;
-- `CANCELADA` não possui setor atual nem data real de entrega.
-
-### RNC e devolução
-
-O sistema também mantém consistência entre:
-
-- indicação de RNC e sua respectiva data;
-- indicação de devolução e sua respectiva data.
+- Git
+- GitHub
+- VS Code
+- Prisma Studio
 
 ---
 
-## 📊 Indicadores
-
-Os indicadores do dashboard são calculados a partir dos dados operacionais do sistema.
-
-Entre eles estão:
-
-### Ordens pendentes
-
-Ordens ainda abertas considerando o período selecionado.
-
-### Entregas previstas
-
-Ordens cuja data solicitada pertence ao mês selecionado.
-
-### Índice de atraso
-
-Considera ordens entregues depois da data solicitada e ordens ainda abertas após o prazo.
-
-### Índice de RNC
-
-Percentual das entregas realizadas no período que possuem registro de RNC.
-
-### Índice de devolução
-
-Percentual das entregas realizadas no período que possuem registro de devolução.
-
-### Entregas prioritárias
-
-Exibe ordens abertas com vencimento próximo ou já atrasadas.
-
----
-
-## 🔎 Filtros e paginação
-
-As principais listagens possuem:
-
-- pesquisa;
-- filtros específicos por entidade;
-- ordenação;
-- paginação de 10 itens por página;
-- tratamento para pesquisas sem resultados.
-
-Na versão atual, filtros e paginação são realizados no frontend.
-
----
-
-## 🛡️ Validações e tratamento de erros
-
-O backend realiza validações como:
-
-- campos obrigatórios;
-- strings vazias;
-- normalização com `trim()`;
-- IDs inválidos;
-- enums inválidos;
-- relacionamentos inexistentes;
-- conflitos de unicidade;
-- combinações inválidas de estados.
-
-Os controllers diferenciam respostas como:
-
-```text
-400 Bad Request
-404 Not Found
-409 Conflict
-500 Internal Server Error
-```
-
-No frontend, os principais formulários também possuem:
-
-- feedback de erro;
-- estados de carregamento;
-- bloqueio de envios duplicados;
-- tratamento de falhas de conexão.
-
----
-
-## 📁 Estrutura do projeto
+## 📁 Estrutura do Projeto
 
 ```text
 controle-producao-mvp/
@@ -354,11 +234,12 @@ controle-producao-mvp/
 ├── backend/
 │   ├── prisma/
 │   │   ├── migrations/
-│   │   └── schema.prisma
+│   │   ├── schema.prisma
+│   │   └── seed.ts
 │   │
 │   └── src/
-│       ├── config/
 │       ├── controllers/
+│       ├── middlewares/
 │       ├── repositories/
 │       ├── routes/
 │       ├── services/
@@ -366,142 +247,176 @@ controle-producao-mvp/
 │
 ├── frontend/
 │   └── src/
-│       ├── assets/
 │       ├── components/
 │       ├── pages/
-│       ├── App.tsx
-│       └── main.tsx
+│       ├── services/
+│       └── App.tsx
 │
 ├── docs/
-│   └── screenshots/
+│   ├── arquitetura.md
+│   ├── regras-negocio.md
+│   ├── tela-clientes.png
+│   ├── tela-dashboard1.png
+│   ├── tela-dashboard2.png
+│   ├── tela-login.png
+│   ├── tela-ordem-servico-form.png
+│   ├── tela-ordem-servico.png
+│   ├── tela-pecas.png
+│   └── tela-pedidos.png
 │
-├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-## 🚀 Executando localmente
+## 🚀 Como Executar o Projeto
 
 ### Pré-requisitos
 
+Antes de começar, tenha instalado:
+
 - Node.js
-- npm
-- Docker
-- Docker Compose
+- PostgreSQL
+- Git
 
 ### 1. Clone o repositório
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/MarcusVRDN/controle-producao-mvp.git
+```
+
+Entre na pasta do projeto:
+
+```bash
 cd controle-producao-mvp
 ```
 
-### 2. Inicie o PostgreSQL
+### 2. Configure o backend
 
-Na raiz do projeto:
-
-```bash
-docker compose up -d
-```
-
-### 3. Configure o backend
+Entre na pasta:
 
 ```bash
 cd backend
+```
+
+Instale as dependências:
+
+```bash
 npm install
 ```
 
-Crie o arquivo:
-
-```text
-backend/.env
-```
-
-Exemplo para desenvolvimento local:
+Crie um arquivo `.env` dentro da pasta `backend` com as variáveis necessárias:
 
 ```env
-PORT=3001
-DATABASE_URL="postgresql://postgres:postgres@localhost:5433/production_control?schema=public"
+DATABASE_URL="postgresql://USUARIO:SENHA@localhost:5432/NOME_DO_BANCO"
+JWT_SECRET="sua_chave_secreta"
 ```
 
-> O `.env` não deve ser versionado. Utilize apenas suas próprias credenciais locais.
+> ⚠️ O arquivo `.env` contém informações sensíveis e não deve ser enviado para o repositório.
 
-### 4. Configure o Prisma
+Execute as migrations:
 
 ```bash
-npx prisma generate
 npx prisma migrate dev
 ```
 
-### 5. Execute o backend
+Opcionalmente, popule o banco com dados demonstrativos:
+
+```bash
+npx prisma db seed
+```
+
+Inicie o backend:
 
 ```bash
 npm run dev
 ```
 
-A API ficará disponível, por padrão, em:
+Por padrão, a API será executada na porta `3001`.
 
-```text
-http://localhost:3001
-```
+### 3. Configure o frontend
 
-### 6. Execute o frontend
-
-Em outro terminal:
+Em outro terminal, entre na pasta do frontend:
 
 ```bash
 cd frontend
+```
+
+Instale as dependências:
+
+```bash
 npm install
+```
+
+Inicie a aplicação:
+
+```bash
 npm run dev
 ```
 
-O Vite normalmente disponibilizará a aplicação em:
+Abra no navegador o endereço exibido pelo Vite.
 
-```text
-http://localhost:5173
+---
+
+## 🌱 Dados Demonstrativos
+
+O projeto possui um seed para facilitar testes e demonstrações locais.
+
+O seed cria dados relacionados de clientes, peças, pedidos e ordens de serviço, permitindo visualizar as principais funcionalidades e indicadores do sistema sem a necessidade de realizar todos os cadastros manualmente.
+
+Para popular o banco:
+
+```bash
+npx prisma db seed
 ```
 
-> Na versão atual, a URL da API ainda está configurada diretamente no frontend como `http://localhost:3001`.
+Caso queira recriar completamente o banco de desenvolvimento:
+
+```bash
+npx prisma migrate reset
+npx prisma db seed
+```
+
+> ⚠️ O comando `prisma migrate reset` remove os dados existentes. Utilize-o apenas em ambiente de desenvolvimento.
 
 ---
 
-## 🗺️ Próximos passos
+## 🎯 Objetivo do Projeto
 
-A versão **v1.1.0** representa o estado atual do MVP.
+Este projeto foi desenvolvido como um **MVP de controle de produção**, com o objetivo de aplicar conhecimentos de desenvolvimento full stack na resolução de um problema próximo de um cenário industrial real.
 
-Algumas evoluções planejadas são:
+A proposta surgiu da necessidade de centralizar informações que normalmente podem estar distribuídas entre planilhas, anotações e diferentes controles utilizados durante o acompanhamento da produção.
 
-- 🔐 autenticação com JWT;
-- 🔒 proteção de rotas;
-- 👤 controle de acesso por usuário;
-- 🧪 testes automatizados;
-- 🌐 configuração da URL da API por variável de ambiente;
-- 📄 paginação server-side;
-- 🚀 deploy da aplicação.
+Durante o desenvolvimento foram trabalhados conceitos como:
 
----
-
-## 📚 Aprendizados
-
-O projeto foi desenvolvido como uma aplicação prática para consolidar conhecimentos de desenvolvimento full stack.
-
-Durante seu desenvolvimento foram trabalhados conceitos como:
-
-- modelagem de um domínio baseado em um problema real;
+- modelagem de banco de dados;
 - construção de APIs REST;
-- separação entre Controller, Service e Repository;
-- modelagem relacional com PostgreSQL;
-- Prisma ORM e migrations;
+- separação de responsabilidades no backend;
 - regras de negócio;
-- integração entre frontend e backend;
-- React com TypeScript;
-- gerenciamento de estados e formulários;
+- autenticação com JWT;
+- relacionamentos entre entidades;
+- validação de dados;
 - tratamento de erros;
-- filtros e paginação;
-- construção de indicadores a partir de dados operacionais.
+- desenvolvimento de interfaces com React;
+- filtros, pesquisa, ordenação e paginação;
+- construção de indicadores;
+- integração entre frontend e backend.
 
-O objetivo não foi apenas implementar operações CRUD, mas construir uma aplicação com **relações, regras e indicadores derivados de um processo produtivo real**.
+---
+
+## 🔮 Próximas Melhorias
+
+O MVP está funcional, mas existem possibilidades de evolução, como:
+
+- refinamento da experiência de alteração de status das ordens de serviço;
+- melhorias de responsividade;
+- implementação de testes automatizados;
+- evolução da estratégia de autenticação;
+- níveis de acesso e permissões;
+- logs e monitoramento;
+- novos indicadores de produção;
+- geração de relatórios;
+- melhorias de UX e acessibilidade.
 
 ---
 
@@ -509,4 +424,6 @@ O objetivo não foi apenas implementar operações CRUD, mas construir uma aplic
 
 **Marcus Nascimento**
 
-GitHub: [MarcusVRDN](https://github.com/MarcusVRDN)
+Estudante de Desenvolvimento de Software Multiplataforma — FATEC.
+
+Projeto desenvolvido para estudo, portfólio e aplicação prática de desenvolvimento full stack.
