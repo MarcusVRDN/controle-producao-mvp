@@ -6,11 +6,29 @@ O projeto foi desenvolvido a partir de problemas encontrados em ambientes produt
 
 A aplicação reúne esses dados em uma única interface, permitindo acompanhar o andamento da produção, consultar indicadores e manter a rastreabilidade básica das ordens de serviço.
 
-> **Status:** MVP funcional  
+> **Versão:** v1.2.0  
+> **Status:** MVP funcional e publicado  
 > **Autenticação:** JWT  
 > **Frontend:** React + TypeScript  
 > **Backend:** Node.js + Express + TypeScript  
 > **Banco de dados:** PostgreSQL
+
+---
+
+## 🌐 Aplicação Online
+
+A versão publicada do projeto está disponível em:
+
+**https://controle-producao-ruby.vercel.app**
+
+### 🔐 Acesso de demonstração
+
+Para testar a aplicação, utilize:
+
+**Email:** `demo@controleproducao.com`  
+**Senha:** `Demo@12345`
+
+> A conta é destinada exclusivamente à demonstração do projeto.
 
 ---
 
@@ -61,9 +79,9 @@ A listagem permite pesquisar, filtrar e acompanhar rapidamente o status e o seto
 
 ### 🔐 Autenticação
 
-- Cadastro de usuário
-- Login
+- Login de usuário
 - Autenticação utilizando JWT
+- Senhas protegidas com bcrypt
 - Proteção das rotas da aplicação
 - Envio automático do token nas requisições autenticadas
 
@@ -194,6 +212,33 @@ Uma descrição mais detalhada da arquitetura está disponível em:
 
 ---
 
+## 🌐 Arquitetura em Produção
+
+A aplicação está distribuída entre serviços independentes para frontend, backend e banco de dados:
+
+```text
+Usuário
+   ↓
+Frontend
+Vercel
+   ↓ HTTPS
+Backend / API REST
+Render
+   ↓
+Prisma ORM
+   ↓
+PostgreSQL
+Neon
+```
+
+- **Vercel:** hospedagem do frontend React/Vite
+- **Render:** hospedagem da API Node.js/Express
+- **Neon:** banco PostgreSQL de produção
+
+A comunicação entre frontend e backend utiliza variáveis de ambiente para permitir configurações diferentes entre desenvolvimento e produção.
+
+---
+
 ## 🛠️ Tecnologias
 
 ### Frontend
@@ -210,12 +255,19 @@ Uma descrição mais detalhada da arquitetura está disponível em:
 - Node.js
 - Express
 - TypeScript
-- JWT
+- JSON Web Token (JWT)
+- bcrypt
 - Prisma ORM
 
 ### Banco de Dados
 
 - PostgreSQL
+
+### Infraestrutura e Deploy
+
+- Vercel
+- Render
+- Neon
 
 ### Ferramentas
 
@@ -305,11 +357,13 @@ Instale as dependências:
 npm install
 ```
 
-Crie um arquivo `.env` dentro da pasta `backend` com as variáveis necessárias:
+Crie um arquivo `.env` dentro da pasta `backend`:
 
 ```env
 DATABASE_URL="postgresql://USUARIO:SENHA@localhost:5432/NOME_DO_BANCO"
 JWT_SECRET="sua_chave_secreta"
+FRONTEND_URL="http://localhost:5173"
+PORT=3001
 ```
 
 > ⚠️ O arquivo `.env` contém informações sensíveis e não deve ser enviado para o repositório.
@@ -336,7 +390,7 @@ Por padrão, a API será executada na porta `3001`.
 
 ### 3. Configure o frontend
 
-Em outro terminal, entre na pasta do frontend:
+Em outro terminal, partindo da raiz do projeto:
 
 ```bash
 cd frontend
@@ -346,6 +400,12 @@ Instale as dependências:
 
 ```bash
 npm install
+```
+
+Crie um arquivo `.env` dentro da pasta `frontend`:
+
+```env
+VITE_API_URL="http://localhost:3001"
 ```
 
 Inicie a aplicação:
@@ -360,9 +420,17 @@ Abra no navegador o endereço exibido pelo Vite.
 
 ## 🌱 Dados Demonstrativos
 
-O projeto possui um seed para facilitar testes e demonstrações locais.
+O projeto possui um seed para facilitar testes e demonstrações.
 
-O seed cria dados relacionados de clientes, peças, pedidos e ordens de serviço, permitindo visualizar as principais funcionalidades e indicadores do sistema sem a necessidade de realizar todos os cadastros manualmente.
+O seed cria:
+
+- usuário de demonstração;
+- clientes;
+- peças;
+- pedidos;
+- ordens de serviço.
+
+Os dados são relacionados entre si para permitir a visualização das principais funcionalidades e indicadores sem a necessidade de realizar todos os cadastros manualmente.
 
 Para popular o banco:
 
@@ -370,14 +438,39 @@ Para popular o banco:
 npx prisma db seed
 ```
 
+Após executar o seed, utilize:
+
+**Email:** `demo@controleproducao.com`  
+**Senha:** `Demo@12345`
+
 Caso queira recriar completamente o banco de desenvolvimento:
 
 ```bash
 npx prisma migrate reset
-npx prisma db seed
 ```
 
 > ⚠️ O comando `prisma migrate reset` remove os dados existentes. Utilize-o apenas em ambiente de desenvolvimento.
+
+---
+
+## 🔐 Variáveis de Ambiente
+
+### Backend
+
+| Variável | Descrição |
+|---|---|
+| `DATABASE_URL` | URL de conexão com o PostgreSQL |
+| `JWT_SECRET` | Chave utilizada para assinatura dos tokens JWT |
+| `FRONTEND_URL` | Origem autorizada pelo CORS |
+| `PORT` | Porta utilizada pela API em desenvolvimento |
+
+### Frontend
+
+| Variável | Descrição |
+|---|---|
+| `VITE_API_URL` | Endereço utilizado pelo frontend para acessar a API |
+
+Os valores reais utilizados em produção não são versionados no repositório.
 
 ---
 
@@ -400,13 +493,15 @@ Durante o desenvolvimento foram trabalhados conceitos como:
 - desenvolvimento de interfaces com React;
 - filtros, pesquisa, ordenação e paginação;
 - construção de indicadores;
-- integração entre frontend e backend.
+- integração entre frontend e backend;
+- configuração de ambientes de desenvolvimento e produção;
+- deploy de uma aplicação full stack.
 
 ---
 
 ## 🔮 Próximas Melhorias
 
-O MVP está funcional, mas existem possibilidades de evolução, como:
+A versão atual representa o MVP funcional do projeto. Algumas possibilidades de evolução são:
 
 - refinamento da experiência de alteração de status das ordens de serviço;
 - melhorias de responsividade;
