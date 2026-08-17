@@ -35,7 +35,7 @@ function hasOwnKey(value: Record<string, unknown>, key: string) {
 
 function ensureObjectPayload(
   value: unknown,
-  message = "Dados do cliente invalidos",
+  message = "Dados do cliente inválidos",
 ): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new ClienteValidationError(message);
@@ -44,13 +44,13 @@ function ensureObjectPayload(
 
 function normalizeRequiredString(value: unknown, fieldName: string) {
   if (typeof value !== "string") {
-    throw new ClienteValidationError(`${fieldName} e obrigatorio`);
+    throw new ClienteValidationError(`${fieldName} é obrigatório`);
   }
 
   const normalizedValue = value.trim();
 
   if (normalizedValue === "") {
-    throw new ClienteValidationError(`${fieldName} e obrigatorio`);
+    throw new ClienteValidationError(`${fieldName} é obrigatório`);
   }
 
   return normalizedValue;
@@ -62,7 +62,7 @@ function normalizeOptionalString(value: unknown, fieldName: string) {
   }
 
   if (typeof value !== "string") {
-    throw new ClienteValidationError(`${fieldName} invalido`);
+    throw new ClienteValidationError(`${fieldName} inválido`);
   }
 
   const normalizedValue = value.trim();
@@ -88,13 +88,13 @@ function buildFinalState(
   const nomeSource = hasOwnKey(payload, "nome") ? payload.nome : current?.nome;
 
   if (nomeSource === undefined) {
-    throw new ClienteValidationError("Nome e obrigatorio");
+    throw new ClienteValidationError("Nome é obrigatório");
   }
 
   const cnpjSource = hasOwnKey(payload, "cnpj") ? payload.cnpj : current?.cnpj;
 
   if (cnpjSource === undefined) {
-    throw new ClienteValidationError("CNPJ e obrigatorio");
+    throw new ClienteValidationError("CNPJ é obrigatório");
   }
 
   return {
@@ -126,7 +126,7 @@ export const clienteService = {
     const cliente = await clienteRepository.findById(id);
 
     if (!cliente) {
-      throw new ClienteNotFoundError("Cliente nao encontrado");
+      throw new ClienteNotFoundError("Cliente não encontrado");
     }
 
     return cliente;

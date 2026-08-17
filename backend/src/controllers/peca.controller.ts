@@ -49,13 +49,13 @@ function handlePecaError(
 
   if (isUniqueCodigoClienteError(error)) {
     return res.status(409).json({
-      error: "Ja existe uma peca com esse codigo para o cliente informado",
+      error: "Já existe uma peça com esse código para o cliente informado",
     });
   }
 
   if (isForeignKeyConstraintError(error)) {
     return res.status(409).json({
-      error: "Peca possui registros relacionados e nao pode ser removida",
+      error: "Peça possui registros relacionados e não pode ser removida",
     });
   }
 
@@ -69,7 +69,7 @@ export async function create(req: Request, res: Response) {
 
     return res.status(201).json(peca);
   } catch (error) {
-    return handlePecaError(error, res, "Erro interno ao criar peca");
+    return handlePecaError(error, res, "Erro interno ao criar peça");
   }
 }
 
@@ -81,7 +81,7 @@ export async function findAll(req: Request, res: Response) {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: "Erro interno ao buscar pecas",
+      error: "Erro interno ao buscar peças",
     });
   }
 }
@@ -91,7 +91,7 @@ export async function findById(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da peca invalido",
+      error: "ID da peça inválido",
     });
   }
 
@@ -100,7 +100,7 @@ export async function findById(req: Request, res: Response) {
 
     return res.status(200).json(peca);
   } catch (error) {
-    return handlePecaError(error, res, "Erro interno ao buscar peca");
+    return handlePecaError(error, res, "Erro interno ao buscar peça");
   }
 }
 
@@ -109,7 +109,7 @@ export async function update(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da peca invalido",
+      error: "ID da peça inválido",
     });
   }
 
@@ -118,7 +118,7 @@ export async function update(req: Request, res: Response) {
 
     return res.status(200).json(peca);
   } catch (error) {
-    return handlePecaError(error, res, "Erro interno ao atualizar peca");
+    return handlePecaError(error, res, "Erro interno ao atualizar peça");
   }
 }
 
@@ -127,7 +127,7 @@ export async function remove(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da peca invalido",
+      error: "ID da peça inválido",
     });
   }
 
@@ -136,6 +136,6 @@ export async function remove(req: Request, res: Response) {
 
     return res.status(204).send();
   } catch (error) {
-    return handlePecaError(error, res, "Erro interno ao remover peca");
+    return handlePecaError(error, res, "Erro interno ao remover peça");
   }
 }

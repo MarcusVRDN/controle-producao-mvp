@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPedidoStatusLabel } from "./pedidoOptions";
+import { apiFetch } from "../services/api";
 
 type Pedido = {
   id: number;
@@ -51,7 +52,7 @@ function PedidoView() {
   useEffect(() => {
     async function buscarPedido() {
       if (!id) {
-        setErro("ID do pedido nao informado.");
+        setErro("ID do pedido não informado.");
         setCarregando(false);
         return;
       }
@@ -60,13 +61,13 @@ function PedidoView() {
       setErro("");
 
       try {
-        const responsePedido = await fetch(`http://localhost:3001/pedidos/${id}`);
+        const responsePedido = await apiFetch(`/pedidos/${id}`);
 
         if (!responsePedido.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responsePedido,
-              "Nao foi possivel carregar o pedido.",
+              "Não foi possível carregar o pedido.",
             ),
           );
         }
@@ -74,15 +75,15 @@ function PedidoView() {
         const pedidoApi = (await responsePedido.json()) as Pedido;
         setPedido(pedidoApi);
 
-        const responseCliente = await fetch(
-          `http://localhost:3001/clientes/${pedidoApi.clienteId}`,
+        const responseCliente = await apiFetch(
+          `/clientes/${pedidoApi.clienteId}`,
         );
 
         if (!responseCliente.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responseCliente,
-              "Nao foi possivel carregar o cliente do pedido.",
+              "Não foi possível carregar o cliente do pedido.",
             ),
           );
         }
@@ -94,7 +95,7 @@ function PedidoView() {
         setErro(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar o pedido.",
+            : "Não foi possível carregar o pedido.",
         );
       } finally {
         setCarregando(false);
@@ -131,7 +132,7 @@ function PedidoView() {
     return (
       <section className="flex flex-col gap-4">
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-          Nao foi possivel montar os detalhes do pedido.
+          Não foi possível montar os detalhes do pedido.
         </div>
 
         <div>
@@ -155,7 +156,7 @@ function PedidoView() {
           </h1>
 
           <p className="text-sm text-slate-300">
-            Consulte as informacoes completas do pedido.
+            Consulte as informações completas do pedido.
           </p>
         </div>
 
@@ -170,7 +171,7 @@ function PedidoView() {
       <div className="w-full max-w-4xl rounded-xl border border-slate-300 bg-white p-6 shadow-md">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <p className="text-sm text-slate-500">Codigo</p>
+            <p className="text-sm text-slate-500">Código</p>
             <p className="font-medium text-slate-900">{pedido.codigo}</p>
           </div>
 
@@ -187,7 +188,7 @@ function PedidoView() {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Observacao</p>
+            <p className="text-sm text-slate-500">Observação</p>
             <p className="font-medium text-slate-900">
               {pedido.observacao ?? "-"}
             </p>

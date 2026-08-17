@@ -37,7 +37,7 @@ function hasOwnKey(value: Record<string, unknown>, key: string) {
 
 function ensureObjectPayload(
   value: unknown,
-  message = "Dados da peca invalidos",
+  message = "Dados da peça inválidos",
 ): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new PecaValidationError(message);
@@ -46,13 +46,13 @@ function ensureObjectPayload(
 
 function normalizeRequiredString(value: unknown, fieldName: string) {
   if (typeof value !== "string") {
-    throw new PecaValidationError(`${fieldName} e obrigatorio`);
+    throw new PecaValidationError(`${fieldName} é obrigatório`);
   }
 
   const normalizedValue = value.trim();
 
   if (normalizedValue === "") {
-    throw new PecaValidationError(`${fieldName} e obrigatorio`);
+    throw new PecaValidationError(`${fieldName} é obrigatório`);
   }
 
   return normalizedValue;
@@ -64,7 +64,7 @@ function normalizeOptionalString(value: unknown, fieldName: string) {
   }
 
   if (typeof value !== "string") {
-    throw new PecaValidationError(`${fieldName} invalido`);
+    throw new PecaValidationError(`${fieldName} inválido`);
   }
 
   const normalizedValue = value.trim();
@@ -194,7 +194,7 @@ async function ensureClienteExists(clienteId: number) {
   const cliente = await clienteRepository.findById(clienteId);
 
   if (!cliente) {
-    throw new PecaNotFoundError("Cliente nao encontrado");
+    throw new PecaNotFoundError("Cliente não encontrado");
   }
 }
 
@@ -205,7 +205,7 @@ async function buildFinalState(
   const codigoSource = hasOwnKey(payload, "codigo") ? payload.codigo : current?.codigo;
 
   if (codigoSource === undefined) {
-    throw new PecaValidationError("Codigo e obrigatorio");
+    throw new PecaValidationError("Código é obrigatório");
   }
 
   const clienteIdSource = hasOwnKey(payload, "clienteId")
@@ -213,7 +213,7 @@ async function buildFinalState(
     : current?.clienteId;
 
   if (clienteIdSource === undefined) {
-    throw new PecaValidationError("clienteId e obrigatorio");
+    throw new PecaValidationError("clienteId é obrigatório");
   }
 
   const descricaoSource = hasOwnKey(payload, "descricao")
@@ -221,7 +221,7 @@ async function buildFinalState(
     : current?.descricao;
 
   if (descricaoSource === undefined) {
-    throw new PecaValidationError("Descricao e obrigatoria");
+    throw new PecaValidationError("Descrição é obrigatória");
   }
 
   const materialSource = hasOwnKey(payload, "material")
@@ -229,16 +229,16 @@ async function buildFinalState(
     : current?.material;
 
   if (materialSource === undefined) {
-    throw new PecaValidationError("Material e obrigatorio");
+    throw new PecaValidationError("Material é obrigatório");
   }
 
   const clienteId = requirePositiveInteger(clienteIdSource, "clienteId");
   await ensureClienteExists(clienteId);
 
   return {
-    codigo: normalizeRequiredString(codigoSource, "Codigo"),
+    codigo: normalizeRequiredString(codigoSource, "Código"),
     clienteId,
-    descricao: normalizeRequiredString(descricaoSource, "Descricao"),
+    descricao: normalizeRequiredString(descricaoSource, "Descrição"),
     material: normalizeRequiredString(materialSource, "Material"),
     tratamentoSuperficial: hasOwnKey(payload, "tratamentoSuperficial")
       ? normalizeSelectableOptionalString(
@@ -250,19 +250,19 @@ async function buildFinalState(
     tratamentoTermico: hasOwnKey(payload, "tratamentoTermico")
       ? normalizeSelectableOptionalString(
           payload.tratamentoTermico,
-          "Tratamento termico",
+          "Tratamento térmico",
           tratamentoTermicoAliases,
         )
       : (current?.tratamentoTermico ?? null),
     terceirizacao: hasOwnKey(payload, "terceirizacao")
       ? normalizeSelectableOptionalString(
           payload.terceirizacao,
-          "Terceirizacao",
+          "Terceirização",
           terceirizacaoAliases,
         )
       : (current?.terceirizacao ?? null),
     observacao: hasOwnKey(payload, "observacao")
-      ? normalizeOptionalString(payload.observacao, "Observacao")
+      ? normalizeOptionalString(payload.observacao, "Observação")
       : (current?.observacao ?? null),
   };
 }
@@ -283,7 +283,7 @@ export const pecaService = {
     const peca = await pecaRepository.findById(id);
 
     if (!peca) {
-      throw new PecaNotFoundError("Peca nao encontrada");
+      throw new PecaNotFoundError("Peça não encontrada");
     }
 
     return peca;

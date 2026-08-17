@@ -7,6 +7,7 @@ import {
   statusOrdemServicoOptions,
   type StatusOrdemServico,
 } from "./ordemServicoOptions";
+import { apiFetch } from "../services/api";
 
 type Peca = {
   id: number;
@@ -126,7 +127,7 @@ function OrdemServicoEditForm() {
   useEffect(() => {
     async function carregarDados() {
       if (!id) {
-        setErroCarregamento("ID da ordem de servico nao informado.");
+        setErroCarregamento("ID da ordem de serviço não informado.");
         setCarregandoDados(false);
         return;
       }
@@ -137,23 +138,23 @@ function OrdemServicoEditForm() {
       try {
         const [responsePedidos, responsePecas, responseOrdemServico] =
           await Promise.all([
-            fetch("http://localhost:3001/pedidos"),
-            fetch("http://localhost:3001/pecas"),
-            fetch(`http://localhost:3001/ordensServico/${id}`),
+            apiFetch("/pedidos"),
+            apiFetch("/pecas"),
+            apiFetch(`/ordensServico/${id}`),
           ]);
 
         if (!responseOrdemServico.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responseOrdemServico,
-              "Nao foi possivel carregar a ordem de servico.",
+              "Não foi possível carregar a ordem de serviço.",
             ),
           );
         }
 
         if (!responsePedidos.ok || !responsePecas.ok) {
           throw new Error(
-            "Nao foi possivel carregar os pedidos e as pecas da ordem de servico.",
+            "Não foi possível carregar os pedidos e as peças da ordem de serviço.",
           );
         }
 
@@ -195,7 +196,7 @@ function OrdemServicoEditForm() {
         setErroCarregamento(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar a ordem de servico.",
+            : "Não foi possível carregar a ordem de serviço.",
         );
       } finally {
         setCarregandoDados(false);
@@ -260,7 +261,7 @@ function OrdemServicoEditForm() {
     setErroSubmit("");
 
     if (!id || !ordemCarregada) {
-      setErroSubmit("A ordem de servico nao foi carregada corretamente.");
+      setErroSubmit("A ordem de serviço não foi carregada corretamente.");
       return;
     }
 
@@ -272,17 +273,17 @@ function OrdemServicoEditForm() {
     const dataEntrega = new Date(`${dataEntregaSolicitada}T00:00:00`);
 
     if (!Number.isInteger(numeroNormalizado) || numeroNormalizado <= 0) {
-      setErroSubmit("Informe um numero de OS inteiro maior que zero.");
+      setErroSubmit("Informe um número de OS inteiro maior que zero.");
       return;
     }
 
     if (!Number.isInteger(pedidoIdNormalizado) || pedidoIdNormalizado <= 0) {
-      setErroSubmit("Selecione um pedido valido.");
+      setErroSubmit("Selecione um pedido válido.");
       return;
     }
 
     if (!Number.isInteger(pecaIdNormalizado) || pecaIdNormalizado <= 0) {
-      setErroSubmit("Selecione uma peca valida.");
+      setErroSubmit("Selecione uma peça válida.");
       return;
     }
 
@@ -308,7 +309,7 @@ function OrdemServicoEditForm() {
     }
 
     if (Number.isNaN(dataEntrega.getTime())) {
-      setErroSubmit("Informe uma data de entrega solicitada valida.");
+      setErroSubmit("Informe uma data de entrega solicitada válida.");
       return;
     }
 
@@ -316,25 +317,25 @@ function OrdemServicoEditForm() {
     const pecaAtual = pecas.find((peca) => peca.id === pecaIdNormalizado);
 
     if (!pedidoAtual) {
-      setErroSubmit("O pedido selecionado nao foi encontrado.");
+      setErroSubmit("O pedido selecionado não foi encontrado.");
       return;
     }
 
     if (!pecaAtual) {
-      setErroSubmit("A peca selecionada nao foi encontrada.");
+      setErroSubmit("A peça selecionada não foi encontrada.");
       return;
     }
 
     if (pedidoAtual.clienteId !== pecaAtual.clienteId) {
       setErroSubmit(
-        "Pedido e peca precisam pertencer ao mesmo cliente para a OS.",
+            "Pedido e peça precisam pertencer ao mesmo cliente para a OS.",
       );
       return;
     }
 
     if (status === "EM_ANDAMENTO" && !isSetorProdutivo(setorAtual)) {
       setErroSubmit(
-        "Ordens em andamento precisam de um setor produtivo valido.",
+            "Ordens em andamento precisam de um setor produtivo válido.",
       );
       return;
     }
@@ -345,7 +346,7 @@ function OrdemServicoEditForm() {
     }
 
     if (possuiDevolucao && !dataDevolucao) {
-      setErroSubmit("Informe a data da devolucao.");
+      setErroSubmit("Informe a data da devolução.");
       return;
     }
 
@@ -377,7 +378,7 @@ function OrdemServicoEditForm() {
     ) {
       if (!dataEntregaReal) {
         setErroSubmit(
-          "Ordens ja concluidas precisam manter uma data real de entrega.",
+            "Ordens já concluídas precisam manter uma data real de entrega.",
         );
         return;
       }
@@ -387,7 +388,7 @@ function OrdemServicoEditForm() {
       );
 
       if (Number.isNaN(dataEntregaRealNormalizada.getTime())) {
-        setErroSubmit("Informe uma data real de entrega valida.");
+        setErroSubmit("Informe uma data real de entrega válida.");
         return;
       }
 
@@ -398,7 +399,7 @@ function OrdemServicoEditForm() {
       const dataRncNormalizada = new Date(`${dataRnc}T00:00:00`);
 
       if (Number.isNaN(dataRncNormalizada.getTime())) {
-        setErroSubmit("Informe uma data da RNC valida.");
+        setErroSubmit("Informe uma data da RNC válida.");
         return;
       }
 
@@ -411,7 +412,7 @@ function OrdemServicoEditForm() {
       const dataDevolucaoNormalizada = new Date(`${dataDevolucao}T00:00:00`);
 
       if (Number.isNaN(dataDevolucaoNormalizada.getTime())) {
-        setErroSubmit("Informe uma data de devolucao valida.");
+      setErroSubmit("Informe uma data de devolução válida.");
         return;
       }
 
@@ -423,7 +424,7 @@ function OrdemServicoEditForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch(`http://localhost:3001/ordensServico/${id}`, {
+      const response = await apiFetch(`/ordensServico/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -433,15 +434,15 @@ function OrdemServicoEditForm() {
 
       if (!response.ok) {
         let fallbackMessage =
-          "Nao foi possivel salvar as alteracoes da ordem de servico.";
+            "Não foi possível salvar as alterações da ordem de serviço.";
 
         if (response.status === 404) {
           fallbackMessage =
-            "A ordem de servico, o pedido ou a peca nao foram encontrados.";
+            "A ordem de serviço, o pedido ou a peça não foram encontrados.";
         }
 
         if (response.status === 409) {
-          fallbackMessage = "Ja existe uma ordem de servico com esse numero.";
+          fallbackMessage = "Já existe uma ordem de serviço com esse número.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -453,7 +454,7 @@ function OrdemServicoEditForm() {
     } catch (error) {
       console.error(error);
       setErroSubmit(
-        "Nao foi possivel conectar com a API para atualizar a ordem de servico.",
+            "Não foi possível conectar com a API para atualizar a ordem de serviço.",
       );
     } finally {
       setSalvando(false);
@@ -461,14 +462,14 @@ function OrdemServicoEditForm() {
   }
 
   if (carregandoDados) {
-    return <p className="text-sm text-slate-200">Carregando ordem de servico...</p>;
+    return <p className="text-sm text-slate-200">Carregando ordem de serviço...</p>;
   }
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-white">
-          Editar ordem de servico
+          Editar ordem de serviço
         </h1>
 
         <p className="text-sm text-slate-300">Edite os campos desejados.</p>
@@ -509,7 +510,7 @@ function OrdemServicoEditForm() {
               onFocus={(event) => event.target.select()}
               onChange={(event) => setNumero(event.target.value)}
               required
-              placeholder="Digite o numero da O.S."
+              placeholder="Digite o número da O.S."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -548,7 +549,7 @@ function OrdemServicoEditForm() {
               htmlFor="pecaId"
               className="text-sm font-medium text-slate-700"
             >
-              Peca
+              Peça
             </label>
 
             <select
@@ -563,7 +564,7 @@ function OrdemServicoEditForm() {
               <option value="" disabled>
                 {!pedidoSelecionado
                   ? "Escolha primeiro o pedido"
-                  : "Escolha a peca"}
+                  : "Escolha a peça"}
               </option>
 
               {pecasDisponiveis.map((peca) => (
@@ -575,7 +576,7 @@ function OrdemServicoEditForm() {
 
             {pedidoSelecionado ? (
               <p className="text-xs text-slate-500">
-                A lista de pecas foi filtrada para o cliente do pedido
+                  A lista de peças foi filtrada para o cliente do pedido
                 selecionado.
               </p>
             ) : null}
@@ -597,7 +598,7 @@ function OrdemServicoEditForm() {
               type="number"
               step="0.01"
               min="0.01"
-              placeholder="Digite o tempo por peca"
+              placeholder="Digite o tempo por peça"
               required
               value={horasUnitarias}
               onChange={onHorasUnitariasInputChanged}
@@ -707,8 +708,8 @@ function OrdemServicoEditForm() {
             {podeEditarDataEntregaReal
               ? "Use este campo apenas para correcao historica da data real de entrega."
               : status === "CONCLUIDA"
-                ? "Na primeira conclusao, a data real sera registrada automaticamente pelo backend."
-                : "Ordens nao concluidas nao permitem editar a data real de entrega."}
+                ? "Na primeira conclusão, a data real será registrada automaticamente pelo backend."
+                    : "Ordens não concluídas não permitem editar a data real de entrega."}
           </p>
         </div>
 
@@ -717,14 +718,14 @@ function OrdemServicoEditForm() {
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observacao
+            Observação
           </label>
 
           <textarea
             id="observacao"
             name="observacao"
             rows={4}
-            placeholder="Digite as observacoes"
+            placeholder="Digite as observações"
             value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
@@ -799,10 +800,10 @@ function OrdemServicoEditForm() {
 
             <p className="text-xs text-slate-500">
               {status === "EM_ANDAMENTO"
-                ? "Selecione um setor produtivo valido para manter a OS em andamento."
+                    ? "Selecione um setor produtivo válido para manter a OS em andamento."
                 : status === "CONCLUIDA"
-                  ? "Ordens concluidas permanecem no setor Liberado."
-                  : "Ordens nao iniciadas e canceladas ficam sem setor atual."}
+                  ? "Ordens concluídas permanecem no setor Liberado."
+                    : "Ordens não iniciadas e canceladas ficam sem setor atual."}
             </p>
           </div>
         </div>
@@ -839,13 +840,13 @@ function OrdemServicoEditForm() {
             disabled={salvando}
             onChange={(event) => setPossuiDevolucao(event.target.checked)}
           />
-          Possui devolucao
+              Possui devolução
         </label>
 
         {possuiDevolucao ? (
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-slate-700">
-              Data da devolucao
+              Data da devolução
             </label>
 
             <input
@@ -871,7 +872,7 @@ function OrdemServicoEditForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            title="Salvar alteracoes"
+            title="Salvar alterações"
             disabled={salvando || !!erroCarregamento}
           >
             {salvando ? "Salvando..." : "Salvar"}

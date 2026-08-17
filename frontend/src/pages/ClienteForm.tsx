@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../services/api";
 
 async function getResponseErrorMessage(
   response: Response,
@@ -62,7 +63,7 @@ function ClienteForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch("http://localhost:3001/clientes", {
+      const response = await apiFetch("/clientes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,10 +72,10 @@ function ClienteForm() {
       });
 
       if (!response.ok) {
-        let fallbackMessage = "Nao foi possivel cadastrar o cliente agora.";
+        let fallbackMessage = "Não foi possível cadastrar o cliente agora.";
 
         if (response.status === 409) {
-          fallbackMessage = "Ja existe um cliente com esse CNPJ.";
+          fallbackMessage = "Já existe um cliente com esse CNPJ.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -85,7 +86,7 @@ function ClienteForm() {
       navigate("/clientes");
     } catch (error) {
       console.error(error);
-      setErroSubmit("Nao foi possivel conectar com a API para cadastrar o cliente.");
+      setErroSubmit("Não foi possível conectar com a API para cadastrar o cliente.");
     } finally {
       setSalvando(false);
     }

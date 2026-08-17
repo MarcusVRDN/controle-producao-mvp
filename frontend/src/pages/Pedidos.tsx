@@ -2,6 +2,7 @@ import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPedidoStatusLabel, pedidoStatusOptions } from "./pedidoOptions";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -35,12 +36,12 @@ function Pedidos() {
 
       try {
         const [responseClientes, responsePedidos] = await Promise.all([
-          fetch("http://localhost:3001/clientes"),
-          fetch("http://localhost:3001/pedidos"),
+          apiFetch("/clientes"),
+          apiFetch("/pedidos"),
         ]);
 
         if (!responseClientes.ok || !responsePedidos.ok) {
-          throw new Error("Nao foi possivel carregar os pedidos.");
+          throw new Error("Não foi possível carregar os pedidos.");
         }
 
         const [clientesApi, pedidosApi] = await Promise.all([
@@ -52,7 +53,7 @@ function Pedidos() {
         setPedidos(pedidosApi);
       } catch (error) {
         console.error(error);
-        setErroCarregamento("Nao foi possivel carregar a lista de pedidos.");
+        setErroCarregamento("Não foi possível carregar a lista de pedidos.");
       } finally {
         setCarregandoDados(false);
       }
@@ -115,7 +116,7 @@ function Pedidos() {
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
-          placeholder="Pesquisar por codigo..."
+            placeholder="Pesquisar por código..."
           value={pesquisa}
           onChange={(event) => {
             setPesquisa(event.target.value);
@@ -175,12 +176,12 @@ function Pedidos() {
         <table className="w-full border-collapse bg-slate-200 text-left text-sm">
           <thead className="bg-slate-300">
             <tr>
-              <th className="border-b border-slate-600 p-3">Codigo</th>
+              <th className="border-b border-slate-600 p-3">Código</th>
               <th className="border-b border-slate-600 p-3">Cliente</th>
-              <th className="border-b border-slate-600 p-3">Observacao</th>
+              <th className="border-b border-slate-600 p-3">Observação</th>
               <th className="border-b border-slate-600 p-3">Status</th>
               <th className="border-b border-slate-600 p-3 text-center">
-                Acoes
+                Ações
               </th>
             </tr>
           </thead>
@@ -206,7 +207,7 @@ function Pedidos() {
                 <td className="border-b border-slate-400 p-3">{pedido.codigo}</td>
                 <td className="border-b border-slate-400 p-3">
                   {clientes.find((cliente) => cliente.id === pedido.clienteId)?.nome ??
-                    "Cliente nao encontrado"}
+                    "Cliente não encontrado"}
                 </td>
                 <td className="border-b border-slate-400 p-3">
                   {pedido.observacao ?? "-"}
@@ -243,7 +244,7 @@ function Pedidos() {
           </button>
 
           <span className="text-sm text-slate-300">
-            Pagina {paginaExibida} de {totalPaginas}
+            Página {paginaExibida} de {totalPaginas}
           </span>
 
           <button

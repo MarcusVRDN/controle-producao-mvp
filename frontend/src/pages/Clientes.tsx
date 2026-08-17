@@ -1,6 +1,7 @@
 import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -27,17 +28,17 @@ function Clientes() {
       setErroCarregamento("");
 
       try {
-        const response = await fetch("http://localhost:3001/clientes");
+        const response = await apiFetch("/clientes");
 
         if (!response.ok) {
-          throw new Error("Nao foi possivel carregar os clientes.");
+          throw new Error("Não foi possível carregar os clientes.");
         }
 
         const clientesApi = await response.json();
         setClientes(clientesApi);
       } catch (error) {
         console.error(error);
-        setErroCarregamento("Nao foi possivel carregar a lista de clientes.");
+        setErroCarregamento("Não foi possível carregar a lista de clientes.");
       } finally {
         setCarregandoDados(false);
       }
@@ -146,7 +147,7 @@ function Clientes() {
               <th className="border-b border-slate-600 p-3">Telefone</th>
               <th className="border-b border-slate-600 p-3">Status</th>
               <th className="border-b border-slate-600 p-3 text-center">
-                Acoes
+                Ações
               </th>
             </tr>
           </thead>
@@ -209,7 +210,7 @@ function Clientes() {
           </button>
 
           <span className="text-sm text-slate-300">
-            Pagina {paginaExibida} de {totalPaginas}
+            Página {paginaExibida} de {totalPaginas}
           </span>
 
           <button

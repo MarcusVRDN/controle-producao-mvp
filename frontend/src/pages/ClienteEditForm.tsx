@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { apiFetch } from "../services/api";
 
 type ClienteApi = {
   nome: string;
@@ -48,7 +49,7 @@ function ClienteEditForm() {
   useEffect(() => {
     async function buscarCliente() {
       if (!id) {
-        setErroCarregamento("ID do cliente nao informado.");
+        setErroCarregamento("ID do cliente não informado.");
         setCarregandoDados(false);
         return;
       }
@@ -57,13 +58,13 @@ function ClienteEditForm() {
       setErroCarregamento("");
 
       try {
-        const response = await fetch(`http://localhost:3001/clientes/${id}`);
+        const response = await apiFetch(`/clientes/${id}`);
 
         if (!response.ok) {
           throw new Error(
             await getResponseErrorMessage(
               response,
-              "Nao foi possivel carregar o cliente.",
+              "Não foi possível carregar o cliente.",
             ),
           );
         }
@@ -79,7 +80,7 @@ function ClienteEditForm() {
         setErroCarregamento(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar o cliente.",
+            : "Não foi possível carregar o cliente.",
         );
       } finally {
         setCarregandoDados(false);
@@ -94,7 +95,7 @@ function ClienteEditForm() {
     setErroSubmit("");
 
     if (!id) {
-      setErroSubmit("ID do cliente nao informado.");
+      setErroSubmit("ID do cliente não informado.");
       return;
     }
 
@@ -124,7 +125,7 @@ function ClienteEditForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch(`http://localhost:3001/clientes/${id}`, {
+      const response = await apiFetch(`/clientes/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -133,14 +134,14 @@ function ClienteEditForm() {
       });
 
       if (!response.ok) {
-        let fallbackMessage = "Nao foi possivel atualizar o cliente agora.";
+        let fallbackMessage = "Não foi possível atualizar o cliente agora.";
 
         if (response.status === 404) {
-          fallbackMessage = "Cliente nao encontrado.";
+          fallbackMessage = "Cliente não encontrado.";
         }
 
         if (response.status === 409) {
-          fallbackMessage = "Ja existe um cliente com esse CNPJ.";
+          fallbackMessage = "Já existe um cliente com esse CNPJ.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -151,7 +152,7 @@ function ClienteEditForm() {
       navigate("/clientes");
     } catch (error) {
       console.error(error);
-      setErroSubmit("Nao foi possivel conectar com a API para atualizar o cliente.");
+      setErroSubmit("Não foi possível conectar com a API para atualizar o cliente.");
     } finally {
       setSalvando(false);
     }
@@ -287,7 +288,7 @@ function ClienteEditForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            title="Salvar alteracoes"
+            title="Salvar alterações"
             disabled={salvando || !!erroCarregamento}
           >
             {salvando ? "Salvando..." : "Salvar"}

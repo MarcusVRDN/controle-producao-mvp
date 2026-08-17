@@ -4,7 +4,7 @@ import Clientes from "./pages/Clientes";
 import Pecas from "./pages/Pecas";
 import Pedidos from "./pages/Pedidos";
 import OrdensServico from "./pages/OrdensServico";
-import ClienteForm from "./pages/ClienteForm"
+import ClienteForm from "./pages/ClienteForm";
 import PecaForm from "./pages/PecaForm";
 import PedidoForm from "./pages/PedidoForm";
 import OrdemServicoForm from "./pages/OrdemServicoForm";
@@ -18,31 +18,39 @@ import PedidoView from "./pages/PedidoView";
 import OrdemServicoView from "./pages/OrdemServicoView";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-
-      <Route element={<Layout />}>
-        <Route index element={<Navigate to= "/dashboard" replace/>}/>
-        <Route path="/dashboard" element={<Dashboard />}/>
-        <Route path="/clientes" element={<Clientes />}/>
-        <Route path="/pecas" element={<Pecas />} />
-        <Route path="/pedidos" element={<Pedidos/>} />
-        <Route path="/ordens-servico" element={<OrdensServico/>}/>
-        <Route path="/clientes/novo" element={<ClienteForm />} />
-        <Route path="/pecas/novo" element={<PecaForm />} />
-        <Route path="/pedidos/novo" element={<PedidoForm />} />
-        <Route path="/ordem-servico/novo" element={<OrdemServicoForm />} />
-        <Route path="/clientes/editar/:id" element={<ClienteEditForm />} />
-        <Route path="/pecas/editar/:id" element={<PecaEditForm />} />
-        <Route path="/pedidos/editar/:id" element={<PedidoEditForm />} />
-        <Route path="/ordens-servico/editar/:id" element={<OrdemServicoEditForm />} />
-        <Route path="/clientes/view/:id" element={<ClienteView />} />
-        <Route path="/pecas/view/:id" element={<PecaView />} />
-        <Route path="/pedidos/view/:id" element={<PedidoView />} />
-        <Route path="/ordens-servico/view/:id" element={<OrdemServicoView />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/clientes" element={<Clientes />} />
+          <Route path="/pecas" element={<Pecas />} />
+          <Route path="/pedidos" element={<Pedidos />} />
+          <Route path="/ordens-servico" element={<OrdensServico />} />
+          <Route path="/clientes/novo" element={<ClienteForm />} />
+          <Route path="/pecas/novo" element={<PecaForm />} />
+          <Route path="/pedidos/novo" element={<PedidoForm />} />
+          <Route path="/ordem-servico/novo" element={<OrdemServicoForm />} />
+          <Route path="/clientes/editar/:id" element={<ClienteEditForm />} />
+          <Route path="/pecas/editar/:id" element={<PecaEditForm />} />
+          <Route path="/pedidos/editar/:id" element={<PedidoEditForm />} />
+          <Route
+            path="/ordens-servico/editar/:id"
+            element={<OrdemServicoEditForm />}
+          />
+          <Route path="/clientes/view/:id" element={<ClienteView />} />
+          <Route path="/pecas/view/:id" element={<PecaView />} />
+          <Route path="/pedidos/view/:id" element={<PedidoView />} />
+          <Route
+            path="/ordens-servico/view/:id"
+            element={<OrdemServicoView />}
+          />
+        </Route>
       </Route>
     </Routes>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -45,7 +46,7 @@ function ClienteView() {
   useEffect(() => {
     async function buscarCliente() {
       if (!id) {
-        setErro("ID do cliente nao informado.");
+        setErro("ID do cliente não informado.");
         setCarregando(false);
         return;
       }
@@ -54,13 +55,13 @@ function ClienteView() {
       setErro("");
 
       try {
-        const response = await fetch(`http://localhost:3001/clientes/${id}`);
+        const response = await apiFetch(`/clientes/${id}`);
 
         if (!response.ok) {
           throw new Error(
             await getResponseErrorMessage(
               response,
-              "Nao foi possivel carregar o cliente.",
+              "Não foi possível carregar o cliente.",
             ),
           );
         }
@@ -72,7 +73,7 @@ function ClienteView() {
         setErro(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar o cliente.",
+            : "Não foi possível carregar o cliente.",
         );
       } finally {
         setCarregando(false);
@@ -109,7 +110,7 @@ function ClienteView() {
     return (
       <section className="flex flex-col gap-4">
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-          Nao foi possivel montar os detalhes do cliente.
+          Não foi possível montar os detalhes do cliente.
         </div>
 
         <div>
@@ -133,7 +134,7 @@ function ClienteView() {
           </h1>
 
           <p className="text-sm text-slate-300">
-            Consulte as informacoes completas do cliente.
+            Consulte as informações completas do cliente.
           </p>
         </div>
 
