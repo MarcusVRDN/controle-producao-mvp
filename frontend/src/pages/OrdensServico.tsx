@@ -9,6 +9,7 @@ import {
   statusOrdemServicoOptions,
   type StatusOrdemServico,
 } from "./ordemServicoOptions";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -62,16 +63,20 @@ async function getResponseErrorMessage(
 
 function OrdensServico() {
   const navigate = useNavigate();
+
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [pecas, setPecas] = useState<Peca[]>([]);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [ordensServico, setOrdensServico] = useState<OrdemServico[]>([]);
+
   const [carregandoDados, setCarregandoDados] = useState(true);
   const [erroCarregamento, setErroCarregamento] = useState("");
   const [erroPatch, setErroPatch] = useState("");
+
   const [ordensAtualizandoIds, setOrdensAtualizandoIds] = useState<number[]>(
     [],
   );
+
   const [pesquisa, setPesquisa] = useState("");
   const [filtroCliente, setFiltroCliente] = useState("TODOS");
   const [filtroStatus, setFiltroStatus] = useState("TODOS");
@@ -85,13 +90,17 @@ function OrdensServico() {
       setErroCarregamento("");
 
       try {
-        const [responseClientes, responsePecas, responsePedidos, responseOrdens] =
-          await Promise.all([
-            fetch("http://localhost:3001/clientes"),
-            fetch("http://localhost:3001/pecas"),
-            fetch("http://localhost:3001/pedidos"),
-            fetch("http://localhost:3001/ordensServico"),
-          ]);
+        const [
+          responseClientes,
+          responsePecas,
+          responsePedidos,
+          responseOrdens,
+        ] = await Promise.all([
+          apiFetch("/clientes"),
+          apiFetch("/pecas"),
+          apiFetch("/pedidos"),
+          apiFetch("/ordensServico"),
+        ]);
 
         if (
           !responseClientes.ok ||
@@ -100,7 +109,7 @@ function OrdensServico() {
           !responseOrdens.ok
         ) {
           throw new Error(
-            "Nao foi possivel carregar a listagem de ordens de servico.",
+            "Não foi possível carregar a listagem de ordens de serviço.",
           );
         }
 
@@ -118,8 +127,9 @@ function OrdensServico() {
         setOrdensServico(ordensServicoApi);
       } catch (error) {
         console.error(error);
+
         setErroCarregamento(
-          "Nao foi possivel carregar os dados da tela de ordens de servico.",
+          "Não foi possível carregar os dados da tela de ordens de serviço.",
         );
       } finally {
         setCarregandoDados(false);
@@ -132,19 +142,30 @@ function OrdensServico() {
   const ordensFiltradas = ordensServico.filter((ordem) => {
     const termo = pesquisa.trim().toLowerCase();
     const pesquisaNumero = ordem.numero.toString();
-    const peca = pecas.find((pecaAtual) => pecaAtual.id === ordem.pecaId);
-    const pedido = pedidos.find((pedidoAtual) => pedidoAtual.id === ordem.pedidoId);
+
+    const peca = pecas.find(
+      (pecaAtual) => pecaAtual.id === ordem.pecaId,
+    );
+
+    const pedido = pedidos.find(
+      (pedidoAtual) => pedidoAtual.id === ordem.pedidoId,
+    );
+
     const correspondePesquisa =
       termo === "" ||
       pesquisaNumero.toLowerCase().includes(termo) ||
       peca?.codigo.toLowerCase().includes(termo);
 
     const correspondeCliente =
-      filtroCliente === "TODOS" || pedido?.clienteId === Number(filtroCliente);
+      filtroCliente === "TODOS" ||
+      pedido?.clienteId === Number(filtroCliente);
+
     const correspondeStatus =
       filtroStatus === "TODOS" || ordem.status === filtroStatus;
+
     const correspondeSetorAtual =
-      filtroSetorAtual === "TODOS" || ordem.setorAtual === filtroSetorAtual;
+      filtroSetorAtual === "TODOS" ||
+      ordem.setorAtual === filtroSetorAtual;
 
     return (
       correspondePesquisa &&
@@ -163,11 +184,21 @@ function OrdensServico() {
   });
 
   const itensPorPagina = 10;
-  const totalPaginas = Math.max(1, Math.ceil(ordensOrdenadas.length / itensPorPagina));
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(ordensOrdenadas.length / itensPorPagina),
+  );
+
   const paginaExibida = Math.min(paginaAtual, totalPaginas);
+
   const indiceInicial = (paginaExibida - 1) * itensPorPagina;
   const indiceFinal = indiceInicial + itensPorPagina;
-  const ordensPaginadas = ordensOrdenadas.slice(indiceInicial, indiceFinal);
+
+  const ordensPaginadas = ordensOrdenadas.slice(
+    indiceInicial,
+    indiceFinal,
+  );
 
   async function atualizarOrdemServico(
     id: number,
@@ -177,10 +208,14 @@ function OrdensServico() {
     },
   ) {
     setErroPatch("");
-    setOrdensAtualizandoIds((idsAtuais) => [...idsAtuais, id]);
+
+    setOrdensAtualizandoIds((idsAtuais) => [
+      ...idsAtuais,
+      id,
+    ]);
 
     try {
-      const response = await fetch(`http://localhost:3001/ordensServico/${id}`, {
+      const response = await apiFetch(`/ordensServico/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -190,18 +225,24 @@ function OrdensServico() {
 
       if (!response.ok) {
         let fallbackMessage =
-          "Nao foi possivel atualizar a ordem de servico agora.";
+          "Não foi possível atualizar a ordem de serviço agora.";
 
         if (response.status === 404) {
-          fallbackMessage = "A ordem de servico nao foi encontrada.";
+          fallbackMessage =
+            "A ordem de serviço não foi encontrada.";
         }
 
-        const message = await getResponseErrorMessage(response, fallbackMessage);
+        const message = await getResponseErrorMessage(
+          response,
+          fallbackMessage,
+        );
+
         setErroPatch(message);
         return;
       }
 
-      const ordemAtualizada = (await response.json()) as OrdemServico;
+      const ordemAtualizada =
+        (await response.json()) as OrdemServico;
 
       setOrdensServico((ordensAtuais) =>
         ordensAtuais.map((ordem) =>
@@ -210,8 +251,9 @@ function OrdensServico() {
       );
     } catch (error) {
       console.error(error);
+
       setErroPatch(
-        "Nao foi possivel conectar com a API para atualizar a ordem de servico.",
+        "Não foi possível conectar com a API para atualizar a ordem de serviço.",
       );
     } finally {
       setOrdensAtualizandoIds((idsAtuais) =>
@@ -220,45 +262,69 @@ function OrdensServico() {
     }
   }
 
-  function onStatusChange(ordemServico: OrdemServico, nextStatus: string) {
-    const statusNormalizado = nextStatus as StatusOrdemServico;
+  function onStatusChange(
+    ordemServico: OrdemServico,
+    nextStatus: string,
+  ) {
+    const statusNormalizado =
+      nextStatus as StatusOrdemServico;
 
     if (
       statusNormalizado === "EM_ANDAMENTO" &&
       !isSetorProdutivo(ordemServico.setorAtual)
     ) {
       setErroPatch(
-        "Para colocar uma OS em andamento pela listagem, use a edicao completa e escolha um setor produtivo valido.",
+        "Para colocar uma OS em andamento pela listagem, escolha primeiro um setor produtivo válido.",
       );
+
       return;
     }
 
     const payload: {
       status: StatusOrdemServico;
       setorAtual?: string | null;
-    } = { status: statusNormalizado };
+    } = {
+      status: statusNormalizado,
+    };
 
-    if (statusNormalizado === "NAO_INICIADA" || statusNormalizado === "CANCELADA") {
-      payload.setorAtual = null;
+    if (
+      statusNormalizado === "NAO_INICIADA" ||
+      statusNormalizado === "CANCELADA"
+    ) {
+      payload.setorAtual = ordemServico.setorAtual;
     }
 
     if (statusNormalizado === "EM_ANDAMENTO") {
       payload.setorAtual = ordemServico.setorAtual;
     }
 
-    atualizarOrdemServico(ordemServico.id, payload);
+    if (statusNormalizado === "CONCLUIDA") {
+      payload.setorAtual = "LIBERADO";
+    }
+
+    atualizarOrdemServico(
+      ordemServico.id,
+      payload,
+    );
   }
 
-  function onSetorAtualChange(ordemServico: OrdemServico, nextSetorAtual: string) {
-    if (ordemServico.status !== "EM_ANDAMENTO") {
+  function onSetorAtualChange(
+    ordemServico: OrdemServico,
+    nextSetorAtual: string,
+  ) {
+    if (ordemServico.status === "CONCLUIDA") {
       setErroPatch(
-        "O setor atual so pode ser alterado rapidamente quando a OS estiver em andamento.",
+        "O setor atual não pode ser alterado quando a OS estiver concluída.",
       );
+
       return;
     }
 
     if (!isSetorProdutivo(nextSetorAtual)) {
-      setErroPatch("Selecione um setor produtivo valido.");
+      setErroPatch(
+        "Selecione um setor produtivo válido.",
+      );
+
       return;
     }
 
@@ -268,20 +334,28 @@ function OrdensServico() {
   }
 
   if (carregandoDados) {
-    return <p className="text-sm text-slate-200">Carregando ordens de servico...</p>;
+    return (
+      <p className="text-sm text-slate-200">
+        Carregando ordens de serviço...
+      </p>
+    );
   }
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
-        <h1 className="text-lg font-semibold text-white">Ordens de Servico</h1>
+        <h1 className="text-lg font-semibold text-white">
+          Ordens de Serviço
+        </h1>
 
         <button
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-          onClick={() => navigate("/ordem-servico/novo")}
+          onClick={() =>
+            navigate("/ordem-servico/novo")
+          }
         >
           <Plus size={18} />
-          Adicionar Ordem de Servico
+          Adicionar Ordem de Serviço
         </button>
       </div>
 
@@ -300,7 +374,7 @@ function OrdensServico() {
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
-          placeholder="Pesquisar por numero ou peca..."
+          placeholder="Pesquisar por número ou peça..."
           value={pesquisa}
           onChange={(event) => {
             setPesquisa(event.target.value);
@@ -317,13 +391,20 @@ function OrdensServico() {
           }}
           className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
         >
-          <option value="TODOS">Todos os status</option>
+          <option value="TODOS">
+            Todos os status
+          </option>
 
-          {statusOrdemServicoOptions.map((status) => (
-            <option key={status.value} value={status.value}>
-              {status.label}
-            </option>
-          ))}
+          {statusOrdemServicoOptions.map(
+            (status) => (
+              <option
+                key={status.value}
+                value={status.value}
+              >
+                {status.label}
+              </option>
+            ),
+          )}
         </select>
 
         <select
@@ -334,10 +415,15 @@ function OrdensServico() {
           }}
           className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
         >
-          <option value="TODOS">Todos os clientes</option>
+          <option value="TODOS">
+            Todos os clientes
+          </option>
 
           {clientes.map((cliente) => (
-            <option key={cliente.id} value={cliente.id}>
+            <option
+              key={cliente.id}
+              value={cliente.id}
+            >
               {cliente.nome}
             </option>
           ))}
@@ -346,15 +432,23 @@ function OrdensServico() {
         <select
           value={filtroSetorAtual}
           onChange={(event) => {
-            setFiltroSetorAtual(event.target.value);
+            setFiltroSetorAtual(
+              event.target.value,
+            );
+
             setPaginaAtual(1);
           }}
           className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
         >
-          <option value="TODOS">Todos os setores</option>
+          <option value="TODOS">
+            Todos os setores
+          </option>
 
           {setorAtualOptions.map((setor) => (
-            <option key={setor.value} value={setor.value}>
+            <option
+              key={setor.value}
+              value={setor.value}
+            >
               {setor.label}
             </option>
           ))}
@@ -368,8 +462,13 @@ function OrdensServico() {
           }}
           className="rounded-lg border border-slate-300 bg-slate-200 px-4 py-2 text-slate-900"
         >
-          <option value="CRESCENTE">Crescente</option>
-          <option value="DECRESCENTE">Decrescente</option>
+          <option value="CRESCENTE">
+            Crescente
+          </option>
+
+          <option value="DECRESCENTE">
+            Decrescente
+          </option>
         </select>
       </div>
 
@@ -377,16 +476,40 @@ function OrdensServico() {
         <table className="w-full border-collapse bg-slate-200 text-left text-sm">
           <thead className="bg-slate-300">
             <tr>
-              <th className="border-b border-slate-600 p-3">Numero</th>
-              <th className="border-b border-slate-600 p-3">Cliente</th>
-              <th className="border-b border-slate-600 p-3">Pedido</th>
-              <th className="border-b border-slate-600 p-3">Peca</th>
-              <th className="border-b border-slate-600 p-3">Quantidade</th>
-              <th className="border-b border-slate-600 p-3">Data de entrega</th>
-              <th className="border-b border-slate-600 p-3">Status</th>
-              <th className="border-b border-slate-600 p-3">Setor atual</th>
+              <th className="border-b border-slate-600 p-3">
+                Número
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Cliente
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Pedido
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Peça
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Quantidade
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Data de entrega
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Status
+              </th>
+
+              <th className="border-b border-slate-600 p-3">
+                Setor atual
+              </th>
+
               <th className="border-b border-slate-600 p-3 text-center">
-                Acoes
+                Ações
               </th>
             </tr>
           </thead>
@@ -398,142 +521,189 @@ function OrdensServico() {
                   colSpan={9}
                   className="border-b border-slate-400 p-6 text-center text-slate-700"
                 >
-                  Nenhuma ordem de servico encontrada para os filtros atuais.
+                  Nenhuma ordem de serviço encontrada para os filtros atuais.
                 </td>
               </tr>
             ) : null}
 
-            {ordensPaginadas.map((ordemServico) => {
-              const pedido = pedidos.find(
-                (pedidoAtual) => pedidoAtual.id === ordemServico.pedidoId,
-              );
-              const cliente = clientes.find(
-                (clienteAtual) => clienteAtual.id === pedido?.clienteId,
-              );
-              const peca = pecas.find(
-                (pecaAtual) => pecaAtual.id === ordemServico.pecaId,
-              );
-              const linhaAtualizando = ordensAtualizandoIds.includes(
-                ordemServico.id,
-              );
-              const valorSetorAtual =
-                ordemServico.status === "EM_ANDAMENTO"
-                  ? isSetorProdutivo(ordemServico.setorAtual)
+            {ordensPaginadas.map(
+              (ordemServico) => {
+                const pedido = pedidos.find(
+                  (pedidoAtual) =>
+                    pedidoAtual.id ===
+                    ordemServico.pedidoId,
+                );
+
+                const cliente = clientes.find(
+                  (clienteAtual) =>
+                    clienteAtual.id ===
+                    pedido?.clienteId,
+                );
+
+                const peca = pecas.find(
+                  (pecaAtual) =>
+                    pecaAtual.id ===
+                    ordemServico.pecaId,
+                );
+
+                const linhaAtualizando =
+                  ordensAtualizandoIds.includes(
+                    ordemServico.id,
+                  );
+
+                const valorSetorAtual =
+                  isSetorProdutivo(
+                    ordemServico.setorAtual,
+                  )
                     ? ordemServico.setorAtual
-                    : ""
-                  : ordemServico.status === "CONCLUIDA"
-                    ? "LIBERADO"
                     : "";
 
-              return (
-                <tr
-                  key={ordemServico.id}
-                  className="transition hover:bg-slate-300"
-                  onClick={() => navigate(`./view/${ordemServico.id}`)}
-                >
-                  <td className="border-b border-slate-400 p-3">
-                    {ordemServico.numero}
-                  </td>
+                return (
+                  <tr
+                    key={ordemServico.id}
+                    className="transition hover:bg-slate-300"
+                    onClick={() =>
+                      navigate(
+                        `./view/${ordemServico.id}`,
+                      )
+                    }
+                  >
+                    <td className="border-b border-slate-400 p-3">
+                      {ordemServico.numero}
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    {cliente?.nome ?? "Cliente nao encontrado"}
-                  </td>
+                    <td className="border-b border-slate-400 p-3">
+                      {cliente?.nome ??
+                        "Cliente não encontrado"}
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    {pedido?.codigo ?? "Pedido nao encontrado"}
-                  </td>
+                    <td className="border-b border-slate-400 p-3">
+                      {pedido?.codigo ??
+                        "Pedido não encontrado"}
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    {peca?.codigo ?? "Peca nao encontrada"}
-                  </td>
+                    <td className="border-b border-slate-400 p-3">
+                      {peca?.codigo ??
+                        "Peça não encontrada"}
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    {ordemServico.quantidade}
-                  </td>
+                    <td className="border-b border-slate-400 p-3">
+                      {ordemServico.quantidade}
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    {new Date(
-                      ordemServico.dataEntregaSolicitada,
-                    ).toLocaleDateString("pt-BR")}
-                  </td>
+                    <td className="border-b border-slate-400 p-3">
+                      {new Date(
+                        ordemServico.dataEntregaSolicitada,
+                      ).toLocaleDateString(
+                        "pt-BR",
+                      )}
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    <select
-                      value={ordemServico.status}
-                      disabled={linhaAtualizando}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                      }}
-                      onChange={(event) =>
-                        onStatusChange(ordemServico, event.target.value)
-                      }
-                      className="rounded-md border border-slate-400 bg-slate-100 px-2 py-1 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200"
-                    >
-                      {statusOrdemServicoOptions.map((status) => (
-                        <option key={status.value} value={status.value}>
-                          {status.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="border-b border-slate-400 p-3">
-                    {ordemServico.status === "EM_ANDAMENTO" ? (
+                    <td className="border-b border-slate-400 p-3">
                       <select
-                        value={valorSetorAtual}
+                        value={ordemServico.status}
                         disabled={linhaAtualizando}
                         onClick={(event) => {
                           event.stopPropagation();
                         }}
                         onChange={(event) =>
-                          onSetorAtualChange(ordemServico, event.target.value)
+                          onStatusChange(
+                            ordemServico,
+                            event.target.value,
+                          )
                         }
                         className="rounded-md border border-slate-400 bg-slate-100 px-2 py-1 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200"
                       >
-                        <option value="" disabled>
-                          Escolha um setor
-                        </option>
-
-                        {setorProdutivoOptions.map((setor) => (
-                          <option key={setor.value} value={setor.value}>
-                            {setor.label}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className="inline-block rounded-md bg-slate-100 px-2 py-1 text-slate-900">
-                        {getSetorAtualLabel(
-                          ordemServico.status === "CONCLUIDA"
-                            ? "LIBERADO"
-                            : ordemServico.setorAtual,
+                        {statusOrdemServicoOptions.map(
+                          (status) => (
+                            <option
+                              key={status.value}
+                              value={status.value}
+                            >
+                              {status.label}
+                            </option>
+                          ),
                         )}
-                      </span>
-                    )}
-                  </td>
+                      </select>
+                    </td>
 
-                  <td className="border-b border-slate-400 p-3">
-                    <div className="flex items-center justify-center gap-3">
-                      <button
-                        className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
-                        title="Editar ordem de servico"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          navigate(`/ordens-servico/editar/${ordemServico.id}`);
-                        }}
-                      >
-                        <Pencil size={17} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    <td className="border-b border-slate-400 p-3">
+                      {ordemServico.status !==
+                      "CONCLUIDA" ? (
+                        <select
+                          value={valorSetorAtual}
+                          disabled={
+                            linhaAtualizando
+                          }
+                          onClick={(event) => {
+                            event.stopPropagation();
+                          }}
+                          onChange={(event) =>
+                            onSetorAtualChange(
+                              ordemServico,
+                              event.target.value,
+                            )
+                          }
+                          className="rounded-md border border-slate-400 bg-slate-100 px-2 py-1 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200"
+                        >
+                          <option
+                            value=""
+                            disabled
+                          >
+                            Escolha um setor
+                          </option>
+
+                          {setorProdutivoOptions.map(
+                            (setor) => (
+                              <option
+                                key={setor.value}
+                                value={setor.value}
+                              >
+                                {setor.label}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      ) : (
+                        <span className="inline-block rounded-md bg-slate-100 px-2 py-1 text-slate-900">
+                          {getSetorAtualLabel(
+                            "LIBERADO",
+                          )}
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="border-b border-slate-400 p-3">
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
+                          title="Editar ordem de serviço"
+                          onClick={(event) => {
+                            event.stopPropagation();
+
+                            navigate(
+                              `/ordens-servico/editar/${ordemServico.id}`,
+                            );
+                          }}
+                        >
+                          <Pencil size={17} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              },
+            )}
           </tbody>
         </table>
 
         <div className="flex items-center justify-between px-3 py-3">
           <button
-            onClick={() => setPaginaAtual((pagina) => Math.max(1, pagina - 1))}
+            onClick={() =>
+              setPaginaAtual((pagina) =>
+                Math.max(1, pagina - 1),
+              )
+            }
             disabled={paginaExibida === 1}
             className="rounded-md bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
           >
@@ -541,17 +711,25 @@ function OrdensServico() {
           </button>
 
           <span className="text-sm text-slate-300">
-            Pagina {paginaExibida} de {totalPaginas}
+            Página {paginaExibida} de{" "}
+            {totalPaginas}
           </span>
 
           <button
             onClick={() =>
-              setPaginaAtual((pagina) => Math.min(totalPaginas, pagina + 1))
+              setPaginaAtual((pagina) =>
+                Math.min(
+                  totalPaginas,
+                  pagina + 1,
+                ),
+              )
             }
-            disabled={paginaExibida === totalPaginas}
+            disabled={
+              paginaExibida === totalPaginas
+            }
             className="rounded-md bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
           >
-            Proxima
+            Próxima
           </button>
         </div>
       </div>

@@ -3,6 +3,7 @@ import CardMetric from "../components/CardMetric";
 import { MoveLeft, MoveRight } from "lucide-react";
 import ProximasEntregas from "../components/ProximasEntregas";
 import IndicadorPercentual from "../components/IndicadorPercentual";
+import { apiFetch } from "../services/api";
 
 type OrdemServico = {
   id: number;
@@ -47,7 +48,7 @@ function Dashboard() {
   // Busca clientes
   useEffect(() => {
     async function buscarClientes() {
-      const response = await fetch("http://localhost:3001/clientes");
+      const response = await apiFetch("/clientes");
 
       if (response.ok) {
         const clientesApi = await response.json();
@@ -63,7 +64,7 @@ function Dashboard() {
   // Busca peças
   useEffect(() => {
     async function buscarPecas() {
-      const response = await fetch("http://localhost:3001/pecas");
+      const response = await apiFetch("/pecas");
 
       if (response.ok) {
         const pecasApi = await response.json();
@@ -79,7 +80,7 @@ function Dashboard() {
   // Busca pedidos
   useEffect(() => {
     async function buscarPedidos() {
-      const response = await fetch("http://localhost:3001/pedidos");
+      const response = await apiFetch("/pedidos");
 
       if (response.ok) {
         const pedidosApi = await response.json();
@@ -95,7 +96,7 @@ function Dashboard() {
   // Busca ordens de serviço
   useEffect(() => {
     async function buscarOrdensServico() {
-      const response = await fetch("http://localhost:3001/ordensServico");
+      const response = await apiFetch("/ordensServico");
 
       if (response.ok) {
         const ordensServicoApi = await response.json();

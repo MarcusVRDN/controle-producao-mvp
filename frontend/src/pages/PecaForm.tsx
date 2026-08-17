@@ -5,6 +5,7 @@ import {
   tratamentoSuperficialOptions,
   tratamentoTermicoOptions,
 } from "./pecaOptions";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -57,17 +58,17 @@ function PecaForm() {
       setErroCarregamento("");
 
       try {
-        const response = await fetch("http://localhost:3001/clientes");
+        const response = await apiFetch("/clientes");
 
         if (!response.ok) {
-          throw new Error("Nao foi possivel carregar os clientes.");
+          throw new Error("Não foi possível carregar os clientes.");
         }
 
         const clientesApi = await response.json();
         setClientes(clientesApi);
       } catch (error) {
         console.error(error);
-        setErroCarregamento("Nao foi possivel carregar os clientes da peca.");
+        setErroCarregamento("Não foi possível carregar os clientes da peça.");
       } finally {
         setCarregandoOpcoes(false);
       }
@@ -87,22 +88,22 @@ function PecaForm() {
     const clienteIdNormalizado = Number(clienteId);
 
     if (codigoNormalizado === "") {
-      setErroSubmit("Informe o codigo da peca.");
+      setErroSubmit("Informe o código da peça.");
       return;
     }
 
     if (!Number.isInteger(clienteIdNormalizado) || clienteIdNormalizado <= 0) {
-      setErroSubmit("Selecione um cliente valido.");
+      setErroSubmit("Selecione um cliente válido.");
       return;
     }
 
     if (descricaoNormalizada === "") {
-      setErroSubmit("Informe a descricao da peca.");
+      setErroSubmit("Informe a descrição da peça.");
       return;
     }
 
     if (materialNormalizado === "") {
-      setErroSubmit("Informe o material da peca.");
+      setErroSubmit("Informe o material da peça.");
       return;
     }
 
@@ -120,7 +121,7 @@ function PecaForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch("http://localhost:3001/pecas", {
+      const response = await apiFetch("/pecas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,15 +130,15 @@ function PecaForm() {
       });
 
       if (!response.ok) {
-        let fallbackMessage = "Nao foi possivel cadastrar a peca agora.";
+        let fallbackMessage = "Não foi possível cadastrar a peça agora.";
 
         if (response.status === 404) {
-          fallbackMessage = "Cliente nao encontrado.";
+          fallbackMessage = "Cliente não encontrado.";
         }
 
         if (response.status === 409) {
           fallbackMessage =
-            "Ja existe uma peca com esse codigo para o cliente informado.";
+            "Já existe uma peça com esse código para o cliente informado.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -148,7 +149,7 @@ function PecaForm() {
       navigate("/pecas");
     } catch (error) {
       console.error(error);
-      setErroSubmit("Nao foi possivel conectar com a API para cadastrar a peca.");
+      setErroSubmit("Não foi possível conectar com a API para cadastrar a peça.");
     } finally {
       setSalvando(false);
     }
@@ -157,10 +158,10 @@ function PecaForm() {
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-white">Cadastrar Peca</h1>
+        <h1 className="text-xl font-semibold text-white">Cadastrar Peça</h1>
 
         <p className="text-sm text-slate-300">
-          Preencha os dados abaixo para criar uma nova peca.
+          Preencha os dados abaixo para criar uma nova peça.
         </p>
       </div>
 
@@ -186,7 +187,7 @@ function PecaForm() {
               htmlFor="codigo"
               className="text-sm font-medium text-slate-700"
             >
-              Codigo
+              Código
             </label>
 
             <input
@@ -195,7 +196,7 @@ function PecaForm() {
               type="text"
               value={codigo}
               onChange={(event) => setCodigo(event.target.value)}
-              placeholder="Digite o codigo da peca..."
+              placeholder="Digite o código da peça..."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -234,7 +235,7 @@ function PecaForm() {
             htmlFor="descricao"
             className="text-sm font-medium text-slate-700"
           >
-            Descricao
+            Descrição
           </label>
 
           <input
@@ -243,7 +244,7 @@ function PecaForm() {
             type="text"
             value={descricao}
             onChange={(event) => setDescricao(event.target.value)}
-            placeholder="Digite a descricao da peca..."
+            placeholder="Digite a descrição da peça..."
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -273,7 +274,7 @@ function PecaForm() {
               htmlFor="tratamentoTermico"
               className="text-sm font-medium text-slate-700"
             >
-              Tratamento Termico
+              Tratamento Térmico
             </label>
 
             <select
@@ -323,7 +324,7 @@ function PecaForm() {
               htmlFor="terceirizacao"
               className="text-sm font-medium text-slate-700"
             >
-              Terceirizacao
+              Terceirização
             </label>
 
             <select
@@ -333,7 +334,7 @@ function PecaForm() {
               onChange={(event) => setTerceirizacao(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
-              <option value="">Sem terceirizacao</option>
+              <option value="">Sem terceirização</option>
 
               {terceirizacaoOptions.map((opcao) => (
                 <option key={opcao} value={opcao}>
@@ -349,14 +350,14 @@ function PecaForm() {
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observacao
+            Observação
           </label>
 
           <textarea
             id="observacao"
             name="observacao"
             rows={4}
-            placeholder="Digite as observacoes..."
+            placeholder="Digite as observações..."
             value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
@@ -377,7 +378,7 @@ function PecaForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            title="Salvar peca"
+            title="Salvar peça"
             disabled={salvando || carregandoOpcoes}
           >
             {salvando ? "Salvando..." : "Salvar"}

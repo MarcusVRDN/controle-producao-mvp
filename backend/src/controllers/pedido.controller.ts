@@ -49,13 +49,13 @@ function handlePedidoError(
 
   if (isUniqueCodigoError(error)) {
     return res.status(409).json({
-      error: "Codigo do pedido ja cadastrado",
+      error: "Código do pedido já cadastrado",
     });
   }
 
   if (isForeignKeyConstraintError(error)) {
     return res.status(409).json({
-      error: "Pedido possui registros relacionados e nao pode ser removido",
+      error: "Pedido possui registros relacionados e não pode ser removido",
     });
   }
 
@@ -91,7 +91,7 @@ export async function findById(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID do pedido invalido",
+      error: "ID do pedido inválido",
     });
   }
 
@@ -109,7 +109,7 @@ export async function update(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID do pedido invalido",
+      error: "ID do pedido inválido",
     });
   }
 
@@ -127,7 +127,7 @@ export async function remove(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID do pedido invalido",
+      error: "ID do pedido inválido",
     });
   }
 

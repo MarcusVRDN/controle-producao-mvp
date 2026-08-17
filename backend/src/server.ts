@@ -5,6 +5,7 @@ import clienteRoutes from "./routes/cliente.routes.js"
 import pecaRoutes from "./routes/peca.routes.js"
 import pedidoRoutes from "./routes/pedido.routes.js"
 import ordemServicoRoutes from "./routes/ordemServico.routes.js"
+import authRoutes from "./routes/auth.routes.js"
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use("/clientes", clienteRoutes)
 app.use("/pecas", pecaRoutes)
 app.use("/pedidos", pedidoRoutes)
 app.use("/ordensServico", ordemServicoRoutes)
+app.use("/auth", authRoutes)
 
 app.get("/", (req, res) => {
   res.json({

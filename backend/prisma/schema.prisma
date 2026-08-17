@@ -106,3 +106,11 @@ model OrdemServico {
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  createdAt DateTime @default(now())
+}

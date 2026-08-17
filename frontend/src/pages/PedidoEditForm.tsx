@@ -4,6 +4,7 @@ import {
   pedidoStatusOptions,
   type PedidoStatus,
 } from "./pedidoOptions";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -56,7 +57,7 @@ function PedidoEditForm() {
   useEffect(() => {
     async function carregarDados() {
       if (!id) {
-        setErroCarregamento("ID do pedido nao informado.");
+        setErroCarregamento("ID do pedido não informado.");
         setCarregandoDados(false);
         return;
       }
@@ -66,21 +67,21 @@ function PedidoEditForm() {
 
       try {
         const [responseClientes, responsePedido] = await Promise.all([
-          fetch("http://localhost:3001/clientes"),
-          fetch(`http://localhost:3001/pedidos/${id}`),
+          apiFetch("/clientes"),
+          apiFetch(`/pedidos/${id}`),
         ]);
 
         if (!responsePedido.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responsePedido,
-              "Nao foi possivel carregar o pedido.",
+              "Não foi possível carregar o pedido.",
             ),
           );
         }
 
         if (!responseClientes.ok) {
-          throw new Error("Nao foi possivel carregar os clientes do pedido.");
+          throw new Error("Não foi possível carregar os clientes do pedido.");
         }
 
         const [clientesApi, pedidoApi] = await Promise.all([
@@ -100,7 +101,7 @@ function PedidoEditForm() {
         setErroCarregamento(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar o pedido.",
+            : "Não foi possível carregar o pedido.",
         );
       } finally {
         setCarregandoDados(false);
@@ -115,7 +116,7 @@ function PedidoEditForm() {
     setErroSubmit("");
 
     if (!id) {
-      setErroSubmit("ID do pedido nao informado.");
+      setErroSubmit("ID do pedido não informado.");
       return;
     }
 
@@ -124,12 +125,12 @@ function PedidoEditForm() {
     const clienteIdNormalizado = Number(clienteId);
 
     if (codigoNormalizado === "") {
-      setErroSubmit("Informe o codigo do pedido.");
+      setErroSubmit("Informe o código do pedido.");
       return;
     }
 
     if (!Number.isInteger(clienteIdNormalizado) || clienteIdNormalizado <= 0) {
-      setErroSubmit("Selecione um cliente valido.");
+      setErroSubmit("Selecione um cliente válido.");
       return;
     }
 
@@ -143,7 +144,7 @@ function PedidoEditForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch(`http://localhost:3001/pedidos/${id}`, {
+      const response = await apiFetch(`/pedidos/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -152,14 +153,14 @@ function PedidoEditForm() {
       });
 
       if (!response.ok) {
-        let fallbackMessage = "Nao foi possivel atualizar o pedido agora.";
+        let fallbackMessage = "Não foi possível atualizar o pedido agora.";
 
         if (response.status === 404) {
-          fallbackMessage = "Pedido ou cliente nao encontrados.";
+          fallbackMessage = "Pedido ou cliente não encontrados.";
         }
 
         if (response.status === 409) {
-          fallbackMessage = "Ja existe um pedido com esse codigo.";
+          fallbackMessage = "Já existe um pedido com esse código.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -170,7 +171,7 @@ function PedidoEditForm() {
       navigate("/pedidos");
     } catch (error) {
       console.error(error);
-      setErroSubmit("Nao foi possivel conectar com a API para atualizar o pedido.");
+      setErroSubmit("Não foi possível conectar com a API para atualizar o pedido.");
     } finally {
       setSalvando(false);
     }
@@ -209,7 +210,7 @@ function PedidoEditForm() {
             htmlFor="codigo"
             className="text-sm font-medium text-slate-700"
           >
-            Codigo
+            Código
           </label>
 
           <input
@@ -219,7 +220,7 @@ function PedidoEditForm() {
             value={codigo}
             required
             onChange={(event) => setCodigo(event.target.value)}
-            placeholder="Digite o codigo do pedido"
+            placeholder="Digite o código do pedido"
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -258,7 +259,7 @@ function PedidoEditForm() {
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observacao
+            Observação
           </label>
 
           <textarea
@@ -267,7 +268,7 @@ function PedidoEditForm() {
             rows={4}
             value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
-            placeholder="Digite as observacoes..."
+            placeholder="Digite as observações..."
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -309,7 +310,7 @@ function PedidoEditForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            title="Salvar alteracoes"
+            title="Salvar alterações"
             disabled={salvando || !!erroCarregamento}
           >
             {salvando ? "Salvando..." : "Salvar"}

@@ -1,20 +1,20 @@
 export const statusOrdemServicoOptions = [
-  { value: "NAO_INICIADA", label: "Nao iniciada" },
+  { value: "NAO_INICIADA", label: "Não iniciada" },
   { value: "EM_ANDAMENTO", label: "Em andamento" },
-  { value: "CONCLUIDA", label: "Concluida" },
+  { value: "CONCLUIDA", label: "Concluída" },
   { value: "CANCELADA", label: "Cancelada" },
 ] as const;
 
 export const setorAtualOptions = [
-  { value: "TORNO_MECANICO", label: "Torno mecanico" },
+  { value: "TORNO_MECANICO", label: "Torno mecânico" },
   { value: "TORNO_CNC", label: "Torno CNC" },
   { value: "CENTRO_USINAGEM", label: "Centro de usinagem" },
   { value: "FRESA_CONVENCIONAL", label: "Fresa convencional" },
   { value: "MANDRILHADORA", label: "Mandrilhadora" },
-  { value: "RETIFICA", label: "Retifica" },
+  { value: "RETIFICA", label: "Retífica" },
   { value: "ROSQUEADEIRA", label: "Rosqueadeira" },
   { value: "AJUSTAGEM", label: "Ajustagem" },
-  { value: "SERVICO_EXTERNO", label: "Servico externo" },
+  { value: "SERVICO_EXTERNO", label: "Serviço externo" },
   { value: "QUALIDADE", label: "Qualidade" },
   { value: "LIBERADO", label: "Liberado" },
 ] as const;

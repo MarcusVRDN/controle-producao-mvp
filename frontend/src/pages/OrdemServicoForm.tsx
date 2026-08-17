@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../services/api";
 
 type Peca = {
   id: number;
@@ -80,13 +81,13 @@ function OrdemServicoForm() {
 
       try {
         const [responsePedidos, responsePecas] = await Promise.all([
-          fetch("http://localhost:3001/pedidos"),
-          fetch("http://localhost:3001/pecas"),
+          apiFetch("/pedidos"),
+          apiFetch("/pecas"),
         ]);
 
         if (!responsePedidos.ok || !responsePecas.ok) {
           throw new Error(
-            "Nao foi possivel carregar os pedidos e as pecas da ordem de servico.",
+            "Não foi possível carregar os pedidos e as peças da ordem de serviço.",
           );
         }
 
@@ -100,7 +101,7 @@ function OrdemServicoForm() {
       } catch (error) {
         console.error(error);
         setErroCarregamento(
-          "Nao foi possivel carregar os dados necessarios para cadastrar a ordem de servico.",
+          "Não foi possível carregar os dados necessários para cadastrar a ordem de serviço.",
         );
       } finally {
         setCarregandoOpcoes(false);
@@ -167,17 +168,17 @@ function OrdemServicoForm() {
     const dataEntrega = new Date(`${dataEntregaSolicitada}T00:00:00`);
 
     if (!Number.isInteger(numeroNormalizado) || numeroNormalizado <= 0) {
-      setErroSubmit("Informe um numero de OS inteiro maior que zero.");
+      setErroSubmit("Informe um número de OS inteiro maior que zero.");
       return;
     }
 
     if (!Number.isInteger(pedidoIdNormalizado) || pedidoIdNormalizado <= 0) {
-      setErroSubmit("Selecione um pedido valido.");
+      setErroSubmit("Selecione um pedido válido.");
       return;
     }
 
     if (!Number.isInteger(pecaIdNormalizado) || pecaIdNormalizado <= 0) {
-      setErroSubmit("Selecione uma peca valida.");
+      setErroSubmit("Selecione uma peça válida.");
       return;
     }
 
@@ -203,7 +204,7 @@ function OrdemServicoForm() {
     }
 
     if (Number.isNaN(dataEntrega.getTime())) {
-      setErroSubmit("Informe uma data de entrega solicitada valida.");
+      setErroSubmit("Informe uma data de entrega solicitada válida.");
       return;
     }
 
@@ -211,18 +212,18 @@ function OrdemServicoForm() {
     const pecaAtual = pecas.find((peca) => peca.id === pecaIdNormalizado);
 
     if (!pedidoAtual) {
-      setErroSubmit("O pedido selecionado nao foi encontrado.");
+      setErroSubmit("O pedido selecionado não foi encontrado.");
       return;
     }
 
     if (!pecaAtual) {
-      setErroSubmit("A peca selecionada nao foi encontrada.");
+      setErroSubmit("A peça selecionada não foi encontrada.");
       return;
     }
 
     if (pedidoAtual.clienteId !== pecaAtual.clienteId) {
       setErroSubmit(
-        "Pedido e peca precisam pertencer ao mesmo cliente para criar a OS.",
+            "Pedido e peça precisam pertencer ao mesmo cliente para criar a OS.",
       );
       return;
     }
@@ -245,7 +246,7 @@ function OrdemServicoForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch("http://localhost:3001/ordensServico", {
+      const response = await apiFetch("/ordensServico", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -255,15 +256,15 @@ function OrdemServicoForm() {
 
       if (!response.ok) {
         let fallbackMessage =
-          "Nao foi possivel salvar a ordem de servico agora.";
+            "Não foi possível salvar a ordem de serviço agora.";
 
         if (response.status === 404) {
           fallbackMessage =
-            "Pedido ou peca nao encontrados. Atualize os dados e tente novamente.";
+            "Pedido ou peça não encontrados. Atualize os dados e tente novamente.";
         }
 
         if (response.status === 409) {
-          fallbackMessage = "Ja existe uma ordem de servico com esse numero.";
+          fallbackMessage = "Já existe uma ordem de serviço com esse número.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -275,7 +276,7 @@ function OrdemServicoForm() {
     } catch (error) {
       console.error(error);
       setErroSubmit(
-        "Nao foi possivel conectar com a API para salvar a ordem de servico.",
+            "Não foi possível conectar com a API para salvar a ordem de serviço.",
       );
     } finally {
       setSalvando(false);
@@ -286,11 +287,11 @@ function OrdemServicoForm() {
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-white">
-          Cadastrar ordem de servico
+          Cadastrar ordem de serviço
         </h1>
 
         <p className="text-sm text-slate-300">
-          Preencha os dados abaixo para criar uma nova ordem de servico.
+          Preencha os dados abaixo para criar uma nova ordem de serviço.
         </p>
       </div>
 
@@ -329,7 +330,7 @@ function OrdemServicoForm() {
               onFocus={(event) => event.target.select()}
               onChange={(event) => setNumero(event.target.value)}
               required
-              placeholder="Digite o numero da O.S."
+              placeholder="Digite o número da O.S."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -368,7 +369,7 @@ function OrdemServicoForm() {
               htmlFor="pecaId"
               className="text-sm font-medium text-slate-700"
             >
-              Peca
+              Peça
             </label>
 
             <select
@@ -383,7 +384,7 @@ function OrdemServicoForm() {
               <option value="" disabled>
                 {!pedidoSelecionado
                   ? "Escolha primeiro o pedido"
-                  : "Escolha a peca"}
+                  : "Escolha a peça"}
               </option>
 
               {pecasDisponiveis.map((peca) => (
@@ -395,7 +396,7 @@ function OrdemServicoForm() {
 
             {pedidoSelecionado ? (
               <p className="text-xs text-slate-500">
-                A lista de pecas foi filtrada para o cliente do pedido
+                  A lista de peças foi filtrada para o cliente do pedido
                 selecionado.
               </p>
             ) : null}
@@ -417,7 +418,7 @@ function OrdemServicoForm() {
               type="number"
               step="0.01"
               min="0.01"
-              placeholder="Digite o tempo por peca"
+              placeholder="Digite o tempo por peça"
               required
               value={horasUnitarias}
               onChange={onHorasUnitariasInputChanged}
@@ -510,14 +511,14 @@ function OrdemServicoForm() {
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observacao
+            Observação
           </label>
 
           <textarea
             id="observacao"
             name="observacao"
             rows={4}
-            placeholder="Digite as observacoes"
+            placeholder="Digite as observações"
             value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
@@ -538,7 +539,7 @@ function OrdemServicoForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            title="Salvar ordem de servico"
+            title="Salvar ordem de serviço"
             disabled={salvando || carregandoOpcoes}
           >
             {salvando ? "Salvando..." : "Salvar"}

@@ -4,6 +4,7 @@ import {
   getSetorAtualLabel,
   getStatusLabel,
 } from "./ordemServicoOptions";
+import { apiFetch } from "../services/api";
 
 type Peca = {
   id: number;
@@ -79,7 +80,7 @@ function OrdemServicoView() {
   useEffect(() => {
     async function buscarOrdemServico() {
       if (!id) {
-        setErro("ID da ordem de servico nao informado.");
+        setErro("ID da ordem de serviço não informado.");
         setCarregando(false);
         return;
       }
@@ -88,15 +89,15 @@ function OrdemServicoView() {
       setErro("");
 
       try {
-        const responseOrdemServico = await fetch(
-          `http://localhost:3001/ordensServico/${id}`,
+        const responseOrdemServico = await apiFetch(
+          `/ordensServico/${id}`,
         );
 
         if (!responseOrdemServico.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responseOrdemServico,
-              "Nao foi possivel carregar a ordem de servico.",
+              "Não foi possível carregar a ordem de serviço.",
             ),
           );
         }
@@ -105,13 +106,13 @@ function OrdemServicoView() {
         setOrdemServico(ordemServicoApi);
 
         const [responsePedido, responsePeca] = await Promise.all([
-          fetch(`http://localhost:3001/pedidos/${ordemServicoApi.pedidoId}`),
-          fetch(`http://localhost:3001/pecas/${ordemServicoApi.pecaId}`),
+          apiFetch(`/pedidos/${ordemServicoApi.pedidoId}`),
+          apiFetch(`/pecas/${ordemServicoApi.pecaId}`),
         ]);
 
         if (!responsePedido.ok || !responsePeca.ok) {
           throw new Error(
-            "Nao foi possivel carregar o pedido e a peca da ordem de servico.",
+            "Não foi possível carregar o pedido e a peça da ordem de serviço.",
           );
         }
 
@@ -123,12 +124,12 @@ function OrdemServicoView() {
         setPedido(pedidoApi);
         setPeca(pecaApi);
 
-        const responseCliente = await fetch(
-          `http://localhost:3001/clientes/${pedidoApi.clienteId}`,
+        const responseCliente = await apiFetch(
+          `/clientes/${pedidoApi.clienteId}`,
         );
 
         if (!responseCliente.ok) {
-          throw new Error("Nao foi possivel carregar o cliente da ordem de servico.");
+          throw new Error("Não foi possível carregar o cliente da ordem de serviço.");
         }
 
         const clienteApi = await responseCliente.json();
@@ -138,7 +139,7 @@ function OrdemServicoView() {
         setErro(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar os detalhes da ordem de servico.",
+            : "Não foi possível carregar os detalhes da ordem de serviço.",
         );
       } finally {
         setCarregando(false);
@@ -149,7 +150,7 @@ function OrdemServicoView() {
   }, [id]);
 
   if (carregando) {
-    return <p className="text-sm text-slate-200">Carregando ordem de servico...</p>;
+    return <p className="text-sm text-slate-200">Carregando ordem de serviço...</p>;
   }
 
   if (erro) {
@@ -175,7 +176,7 @@ function OrdemServicoView() {
     return (
       <section className="flex flex-col gap-4">
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-          Nao foi possivel montar todos os detalhes da ordem de servico.
+          Não foi possível montar todos os detalhes da ordem de serviço.
         </div>
 
         <div>
@@ -195,11 +196,11 @@ function OrdemServicoView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-white">
-            Detalhes da ordem de servico
+            Detalhes da ordem de serviço
           </h1>
 
           <p className="text-sm text-slate-300">
-            Consulte as informacoes completas da ordem de servico.
+            Consulte as informações completas da ordem de serviço.
           </p>
         </div>
 
@@ -229,7 +230,7 @@ function OrdemServicoView() {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Peca</p>
+            <p className="text-sm text-slate-500">Peça</p>
             <p className="font-medium text-slate-900">{peca.codigo}</p>
           </div>
 
@@ -309,7 +310,7 @@ function OrdemServicoView() {
             <div>
               <p className="text-sm text-slate-500">Possui RNC?</p>
               <p className="font-medium text-slate-900">
-                {ordemServico.possuiRnc ? "Sim" : "Nao"}
+                {ordemServico.possuiRnc ? "Sim" : "Não"}
               </p>
             </div>
             <div>
@@ -323,9 +324,9 @@ function OrdemServicoView() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-slate-500">Possui devolucao?</p>
+              <p className="text-sm text-slate-500">Possui devolução?</p>
             <p className="font-medium text-slate-900">
-              {ordemServico.possuiDevolucao ? "Sim" : "Nao"}
+              {ordemServico.possuiDevolucao ? "Sim" : "Não"}
             </p>
             <div>
               <p className="text-sm text-slate-500">Data:</p>

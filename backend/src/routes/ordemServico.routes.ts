@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { create, findAll, findById, remove, update, patchStatusAndSetor } from "../controllers/ordemServico.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+router.use(authMiddleware);
 
 router.post (
    "/", create

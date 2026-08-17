@@ -42,7 +42,7 @@ function handleOrdemServicoError(
 
   if (isUniqueNumeroError(error)) {
     return res.status(409).json({
-      error: "Numero da ordem de servico ja cadastrado",
+      error: "Número da ordem de serviço já cadastrado",
     });
   }
 
@@ -59,7 +59,7 @@ export async function create(req: Request, res: Response) {
     return handleOrdemServicoError(
       error,
       res,
-      "Erro interno ao criar ordem de servico",
+      "Erro interno ao criar ordem de serviço",
     );
   }
 }
@@ -72,7 +72,7 @@ export async function findAll(req: Request, res: Response) {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: "Erro interno ao buscar ordens de servico",
+      error: "Erro interno ao buscar ordens de serviço",
     });
   }
 }
@@ -82,7 +82,7 @@ export async function findById(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da ordem de servico invalido",
+      error: "ID da ordem de serviço inválido",
     });
   }
 
@@ -94,7 +94,7 @@ export async function findById(req: Request, res: Response) {
     return handleOrdemServicoError(
       error,
       res,
-      "Erro interno ao buscar ordem de servico",
+      "Erro interno ao buscar ordem de serviço",
     );
   }
 }
@@ -104,7 +104,7 @@ export async function update(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da ordem de servico invalido",
+      error: "ID da ordem de serviço inválido",
     });
   }
 
@@ -116,7 +116,7 @@ export async function update(req: Request, res: Response) {
     return handleOrdemServicoError(
       error,
       res,
-      "Erro interno ao atualizar ordem de servico",
+      "Erro interno ao atualizar ordem de serviço",
     );
   }
 }
@@ -126,7 +126,7 @@ export async function remove(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da ordem de servico invalido",
+      error: "ID da ordem de serviço inválido",
     });
   }
 
@@ -138,7 +138,7 @@ export async function remove(req: Request, res: Response) {
     return handleOrdemServicoError(
       error,
       res,
-      "Erro interno ao remover ordem de servico",
+      "Erro interno ao remover ordem de serviço",
     );
   }
 }
@@ -148,7 +148,7 @@ export async function patchStatusAndSetor(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID da ordem de servico invalido",
+      error: "ID da ordem de serviço inválido",
     });
   }
 
@@ -163,7 +163,7 @@ export async function patchStatusAndSetor(req: Request, res: Response) {
     return handleOrdemServicoError(
       error,
       res,
-      "Erro interno ao atualizar status da ordem de servico",
+      "Erro interno ao atualizar status da ordem de serviço",
     );
   }
 }

@@ -83,7 +83,7 @@ function hasOwnKey(
 
 function ensureObjectPayload(
   value: unknown,
-  message = "Dados da ordem de servico invalidos",
+  message = "Dados da ordem de serviço inválidos",
 ): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new OrdemServicoValidationError(message);
@@ -103,7 +103,7 @@ function requirePositiveInteger(value: unknown, fieldName: string): number {
 function requirePositiveFiniteNumber(value: unknown, fieldName: string): number {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     throw new OrdemServicoValidationError(
-      `${fieldName} deve ser um numero finito maior que zero`,
+      `${fieldName} deve ser um número finito maior que zero`,
     );
   }
 
@@ -117,7 +117,7 @@ function parseRequiredDate(value: unknown, fieldName: string): Date {
 
   if (!(value instanceof Date) && typeof value !== "string") {
     throw new OrdemServicoValidationError(
-      `${fieldName} deve conter uma data valida`,
+      `${fieldName} deve conter uma data válida`,
     );
   }
 
@@ -125,7 +125,7 @@ function parseRequiredDate(value: unknown, fieldName: string): Date {
 
   if (Number.isNaN(parsedDate.getTime())) {
     throw new OrdemServicoValidationError(
-      `${fieldName} deve conter uma data valida`,
+      `${fieldName} deve conter uma data válida`,
     );
   }
 
@@ -139,7 +139,7 @@ function parseOptionalDate(value: unknown, fieldName: string): Date | null {
 
   if (!(value instanceof Date) && typeof value !== "string") {
     throw new OrdemServicoValidationError(
-      `${fieldName} deve conter uma data valida`,
+      `${fieldName} deve conter uma data válida`,
     );
   }
 
@@ -147,7 +147,7 @@ function parseOptionalDate(value: unknown, fieldName: string): Date | null {
 
   if (Number.isNaN(parsedDate.getTime())) {
     throw new OrdemServicoValidationError(
-      `${fieldName} deve conter uma data valida`,
+      `${fieldName} deve conter uma data válida`,
     );
   }
 
@@ -156,7 +156,7 @@ function parseOptionalDate(value: unknown, fieldName: string): Date | null {
 
 function parseStatus(value: unknown): StatusOrdemServico {
   if (typeof value !== "string" || !statusValues.has(value as StatusOrdemServico)) {
-    throw new OrdemServicoValidationError("Status da ordem de servico invalido");
+    throw new OrdemServicoValidationError("Status da ordem de serviço inválido");
   }
 
   return value as StatusOrdemServico;
@@ -171,7 +171,7 @@ function parseNullableSetorAtual(value: unknown): SetorOrdemServico | null {
     typeof value !== "string" ||
     !setorValues.has(value as SetorOrdemServico)
   ) {
-    throw new OrdemServicoValidationError("Setor atual invalido");
+    throw new OrdemServicoValidationError("Setor atual inválido");
   }
 
   return value as SetorOrdemServico;
@@ -195,7 +195,7 @@ function parseBoolean(
 
 function normalizeSetores(value: unknown): string {
   if (typeof value !== "string") {
-    throw new OrdemServicoValidationError("Setores deve ser uma string valida");
+    throw new OrdemServicoValidationError("Setores deve ser uma string válida");
   }
 
   const setores = value
@@ -205,7 +205,7 @@ function normalizeSetores(value: unknown): string {
 
   if (setores.length === 0) {
     throw new OrdemServicoValidationError(
-      "Informe pelo menos um setor valido",
+      "Informe pelo menos um setor válido",
     );
   }
 
@@ -218,7 +218,7 @@ function normalizeObservacao(value: unknown): string | undefined {
   }
 
   if (typeof value !== "string") {
-    throw new OrdemServicoValidationError("Observacao invalida");
+    throw new OrdemServicoValidationError("Observação inválida");
   }
 
   return value;
@@ -231,18 +231,18 @@ async function ensurePedidoAndPecaBelongToSameCliente(
   const pedido = await pedidoRepository.findById(pedidoId);
 
   if (!pedido) {
-    throw new OrdemServicoNotFoundError("Pedido nao encontrado");
+    throw new OrdemServicoNotFoundError("Pedido não encontrado");
   }
 
   const peca = await pecaRepository.findById(pecaId);
 
   if (!peca) {
-    throw new OrdemServicoNotFoundError("Peca nao encontrada");
+    throw new OrdemServicoNotFoundError("Peça não encontrada");
   }
 
   if (pedido.clienteId !== peca.clienteId) {
     throw new OrdemServicoValidationError(
-      "Pedido e peca devem pertencer ao mesmo cliente",
+      "Pedido e peça devem pertencer ao mesmo cliente",
     );
   }
 }
@@ -300,7 +300,7 @@ function resolveDataDevolucao(
   current?: OrdemServicoRecord,
 ) {
   if (hasOwnKey(payload, "dataDevolucao")) {
-    return parseOptionalDate(payload.dataDevolucao, "Data da devolucao");
+    return parseOptionalDate(payload.dataDevolucao, "Data da devolução");
   }
 
   return current?.dataDevolucao ?? null;
@@ -324,7 +324,7 @@ function applyStatusRules(args: {
       if (dataEntregaRealProvided) {
         if (dataEntregaReal === null) {
           throw new OrdemServicoValidationError(
-            "Ordens concluidas exigem data de entrega real preenchida",
+            "Ordens concluídas exigem data de entrega real preenchida",
           );
         }
 
@@ -345,7 +345,7 @@ function applyStatusRules(args: {
   if (status === StatusOrdemServico.EM_ANDAMENTO) {
     if (dataEntregaRealProvided && dataEntregaReal !== null) {
       throw new OrdemServicoValidationError(
-        "Ordens em andamento nao podem possuir data de entrega real",
+        "Ordens em andamento não podem possuir data de entrega real",
       );
     }
 
@@ -353,13 +353,13 @@ function applyStatusRules(args: {
 
     if (!setorAtual) {
       throw new OrdemServicoValidationError(
-        "Ordens em andamento exigem um setor atual valido",
+        "Ordens em andamento exigem um setor atual válido",
       );
     }
 
     if (setorAtual === SetorOrdemServico.LIBERADO) {
       throw new OrdemServicoValidationError(
-        "Ordens em andamento nao podem ficar no setor LIBERADO",
+        "Ordens em andamento não podem ficar no setor LIBERADO",
       );
     }
 
@@ -368,13 +368,13 @@ function applyStatusRules(args: {
 
   if (setorAtualProvided && setorAtual !== null) {
     throw new OrdemServicoValidationError(
-      `Status ${status} nao permite setor atual preenchido`,
+      `Status ${status} não permite setor atual preenchido`,
     );
   }
 
   if (dataEntregaRealProvided && dataEntregaReal !== null) {
     throw new OrdemServicoValidationError(
-      `Status ${status} nao permite data de entrega real preenchida`,
+      `Status ${status} não permite data de entrega real preenchida`,
     );
   }
 
@@ -396,7 +396,7 @@ function applyRncRules(args: {
   if (possuiRnc) {
     if (!dataRnc) {
       throw new OrdemServicoValidationError(
-        "Data da RNC e obrigatoria quando possuiRnc for true",
+        "Data da RNC é obrigatória quando possuiRnc for true",
       );
     }
 
@@ -405,7 +405,7 @@ function applyRncRules(args: {
 
   if (dataRncProvided && dataRnc !== null) {
     throw new OrdemServicoValidationError(
-      "Data da RNC nao deve ser informada quando possuiRnc for false",
+      "Data da RNC não deve ser informada quando possuiRnc for false",
     );
   }
 
@@ -425,7 +425,7 @@ function applyDevolucaoRules(args: {
   if (possuiDevolucao) {
     if (!dataDevolucao) {
       throw new OrdemServicoValidationError(
-        "Data da devolucao e obrigatoria quando possuiDevolucao for true",
+        "Data da devolução é obrigatória quando possuiDevolucao for true",
       );
     }
 
@@ -434,7 +434,7 @@ function applyDevolucaoRules(args: {
 
   if (dataDevolucaoProvided && dataDevolucao !== null) {
     throw new OrdemServicoValidationError(
-      "Data da devolucao nao deve ser informada quando possuiDevolucao for false",
+      "Data da devolução não deve ser informada quando possuiDevolucao for false",
     );
   }
 
@@ -447,12 +447,12 @@ async function buildFinalState(
   current?: OrdemServicoRecord,
 ): Promise<OrdemServicoPersistedData> {
   const numero = hasOwnKey(payload, "numero")
-    ? requirePositiveInteger(payload.numero, "Numero da ordem de servico")
+    ? requirePositiveInteger(payload.numero, "Número da ordem de serviço")
     : current?.numero;
 
   if (numero === undefined) {
     throw new OrdemServicoValidationError(
-      "Numero da ordem de servico e obrigatorio",
+      "Número da ordem de serviço é obrigatório",
     );
   }
 
@@ -461,7 +461,7 @@ async function buildFinalState(
     : current?.pedidoId;
 
   if (pedidoId === undefined) {
-    throw new OrdemServicoValidationError("pedidoId e obrigatorio");
+    throw new OrdemServicoValidationError("pedidoId é obrigatório");
   }
 
   const pecaId = hasOwnKey(payload, "pecaId")
@@ -469,7 +469,7 @@ async function buildFinalState(
     : current?.pecaId;
 
   if (pecaId === undefined) {
-    throw new OrdemServicoValidationError("pecaId e obrigatorio");
+    throw new OrdemServicoValidationError("pecaId é obrigatório");
   }
 
   await ensurePedidoAndPecaBelongToSameCliente(pedidoId, pecaId);
@@ -479,15 +479,15 @@ async function buildFinalState(
     : current?.quantidade;
 
   if (quantidade === undefined) {
-    throw new OrdemServicoValidationError("Quantidade e obrigatoria");
+    throw new OrdemServicoValidationError("Quantidade é obrigatória");
   }
 
   const horasUnitarias = hasOwnKey(payload, "horasUnitarias")
-    ? requirePositiveFiniteNumber(payload.horasUnitarias, "Horas unitarias")
+    ? requirePositiveFiniteNumber(payload.horasUnitarias, "Horas unitárias")
     : current?.horasUnitarias;
 
   if (horasUnitarias === undefined) {
-    throw new OrdemServicoValidationError("Horas unitarias e obrigatoria");
+    throw new OrdemServicoValidationError("Horas unitárias é obrigatória");
   }
 
   const setoresSource = hasOwnKey(payload, "setores") ? payload.setores : current?.setores;
@@ -646,7 +646,7 @@ export const ordemServicoService = {
     const ordemServico = await ordemServicoRepository.findById(id);
 
     if (!ordemServico) {
-      throw new OrdemServicoNotFoundError("Ordem de servico nao encontrada");
+      throw new OrdemServicoNotFoundError("Ordem de serviço não encontrada");
     }
 
     return ordemServico;
@@ -668,25 +668,25 @@ export const ordemServicoService = {
   },
 
   async updateStatusAndSetor(id: number, data: OrdemServicoStatusPatchInput) {
-    ensureObjectPayload(data, "Dados do patch da ordem de servico invalidos");
+    ensureObjectPayload(data, "Dados do patch da ordem de serviço inválidos");
 
     const payloadKeys = Object.keys(data);
 
     if (payloadKeys.length === 0) {
       throw new OrdemServicoValidationError(
-        "Informe status e/ou setorAtual para atualizar a ordem de servico",
+        "Informe status e/ou setorAtual para atualizar a ordem de serviço",
       );
     }
 
     if (payloadKeys.some((key) => !patchAllowedKeys.has(key))) {
       throw new OrdemServicoValidationError(
-        "O patch da ordem de servico permite apenas status e setorAtual",
+        "O patch da ordem de serviço permite apenas status e setorAtual",
       );
     }
 
     if (!hasOwnKey(data, "status") && !hasOwnKey(data, "setorAtual")) {
       throw new OrdemServicoValidationError(
-        "Informe status e/ou setorAtual para atualizar a ordem de servico",
+        "Informe status e/ou setorAtual para atualizar a ordem de serviço",
       );
     }
 

@@ -49,13 +49,13 @@ function handleClienteError(
 
   if (isUniqueCnpjError(error)) {
     return res.status(409).json({
-      error: "CNPJ do cliente ja cadastrado",
+      error: "CNPJ do cliente já cadastrado",
     });
   }
 
   if (isForeignKeyConstraintError(error)) {
     return res.status(409).json({
-      error: "Cliente possui registros relacionados e nao pode ser removido",
+      error: "Cliente possui registros relacionados e não pode ser removido",
     });
   }
 
@@ -91,7 +91,7 @@ export async function findById(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID do cliente invalido",
+      error: "ID do cliente inválido",
     });
   }
 
@@ -109,7 +109,7 @@ export async function update(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID do cliente invalido",
+      error: "ID do cliente inválido",
     });
   }
 
@@ -127,7 +127,7 @@ export async function remove(req: Request, res: Response) {
 
   if (id === null) {
     return res.status(400).json({
-      error: "ID do cliente invalido",
+      error: "ID do cliente inválido",
     });
   }
 

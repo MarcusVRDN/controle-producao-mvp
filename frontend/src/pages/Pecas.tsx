@@ -1,6 +1,7 @@
 import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -37,12 +38,12 @@ function Pecas() {
 
       try {
         const [responseClientes, responsePecas] = await Promise.all([
-          fetch("http://localhost:3001/clientes"),
-          fetch("http://localhost:3001/pecas"),
+          apiFetch("/clientes"),
+          apiFetch("/pecas"),
         ]);
 
         if (!responseClientes.ok || !responsePecas.ok) {
-          throw new Error("Nao foi possivel carregar as pecas.");
+          throw new Error("Não foi possível carregar as peças.");
         }
 
         const [clientesApi, pecasApi] = await Promise.all([
@@ -54,7 +55,7 @@ function Pecas() {
         setPecas(pecasApi);
       } catch (error) {
         console.error(error);
-        setErroCarregamento("Nao foi possivel carregar a lista de pecas.");
+        setErroCarregamento("Não foi possível carregar a lista de peças.");
       } finally {
         setCarregandoDados(false);
       }
@@ -89,20 +90,20 @@ function Pecas() {
   const pecasPaginadas = pecasOrdenadas.slice(indiceInicial, indiceFinal);
 
   if (carregandoDados) {
-    return <p className="text-sm text-slate-200">Carregando pecas...</p>;
+    return <p className="text-sm text-slate-200">Carregando peças...</p>;
   }
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex h-16 items-center justify-between">
-        <h1 className="text-lg font-semibold text-white">Pecas</h1>
+        <h1 className="text-lg font-semibold text-white">Peças</h1>
 
         <button
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
           onClick={() => navigate("/pecas/novo")}
         >
           <Plus size={18} />
-          Adicionar Peca
+          Adicionar Peça
         </button>
       </div>
 
@@ -115,7 +116,7 @@ function Pecas() {
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
-          placeholder="Pesquisar por codigo..."
+            placeholder="Pesquisar por código..."
           value={pesquisa}
           onChange={(event) => {
             setPesquisa(event.target.value);
@@ -158,12 +159,12 @@ function Pecas() {
         <table className="w-full border-collapse bg-slate-200 text-left text-sm">
           <thead className="bg-slate-300">
             <tr>
-              <th className="border-b border-slate-600 p-3">Codigo</th>
+              <th className="border-b border-slate-600 p-3">Código</th>
               <th className="border-b border-slate-600 p-3">Cliente</th>
-              <th className="border-b border-slate-600 p-3">Descricao</th>
+              <th className="border-b border-slate-600 p-3">Descrição</th>
               <th className="border-b border-slate-600 p-3">Material</th>
               <th className="border-b border-slate-600 p-3 text-center">
-                Acoes
+                Ações
               </th>
             </tr>
           </thead>
@@ -175,7 +176,7 @@ function Pecas() {
                   colSpan={5}
                   className="border-b border-slate-400 p-6 text-center text-slate-700"
                 >
-                  Nenhuma peca encontrada para os filtros atuais.
+                  Nenhuma peça encontrada para os filtros atuais.
                 </td>
               </tr>
             ) : null}
@@ -189,7 +190,7 @@ function Pecas() {
                 <td className="border-b border-slate-400 p-3">{peca.codigo}</td>
                 <td className="border-b border-slate-400 p-3">
                   {clientes.find((cliente) => cliente.id === peca.clienteId)?.nome ??
-                    "Cliente nao encontrado"}
+                    "Cliente não encontrado"}
                 </td>
                 <td className="border-b border-slate-400 p-3">
                   {peca.descricao}
@@ -201,7 +202,7 @@ function Pecas() {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       className="rounded-md p-2 text-blue-600 transition hover:bg-blue-100"
-                      title="Editar peca"
+                      title="Editar peça"
                       onClick={(event) => {
                         event.stopPropagation();
                         navigate(`/pecas/editar/${peca.id}`);
@@ -226,7 +227,7 @@ function Pecas() {
           </button>
 
           <span className="text-sm text-slate-300">
-            Pagina {paginaExibida} de {totalPaginas}
+            Página {paginaExibida} de {totalPaginas}
           </span>
 
           <button

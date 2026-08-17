@@ -5,6 +5,7 @@ import {
   normalizeTratamentoSuperficialValue,
   normalizeTratamentoTermicoValue,
 } from "./pecaOptions";
+import { apiFetch } from "../services/api";
 
 type Peca = {
   id: number;
@@ -59,7 +60,7 @@ function PecaView() {
   useEffect(() => {
     async function buscarPeca() {
       if (!id) {
-        setErro("ID da peca nao informado.");
+        setErro("ID da peça não informado.");
         setCarregando(false);
         return;
       }
@@ -68,13 +69,13 @@ function PecaView() {
       setErro("");
 
       try {
-        const responsePeca = await fetch(`http://localhost:3001/pecas/${id}`);
+        const responsePeca = await apiFetch(`/pecas/${id}`);
 
         if (!responsePeca.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responsePeca,
-              "Nao foi possivel carregar a peca.",
+              "Não foi possível carregar a peça.",
             ),
           );
         }
@@ -82,15 +83,15 @@ function PecaView() {
         const pecaApi = (await responsePeca.json()) as Peca;
         setPeca(pecaApi);
 
-        const responseCliente = await fetch(
-          `http://localhost:3001/clientes/${pecaApi.clienteId}`,
+        const responseCliente = await apiFetch(
+          `/clientes/${pecaApi.clienteId}`,
         );
 
         if (!responseCliente.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responseCliente,
-              "Nao foi possivel carregar o cliente da peca.",
+              "Não foi possível carregar o cliente da peça.",
             ),
           );
         }
@@ -100,7 +101,7 @@ function PecaView() {
       } catch (error) {
         console.error(error);
         setErro(
-          error instanceof Error ? error.message : "Nao foi possivel carregar a peca.",
+          error instanceof Error ? error.message : "Não foi possível carregar a peça.",
         );
       } finally {
         setCarregando(false);
@@ -111,7 +112,7 @@ function PecaView() {
   }, [id]);
 
   if (carregando) {
-    return <p className="text-sm text-slate-200">Carregando peca...</p>;
+    return <p className="text-sm text-slate-200">Carregando peça...</p>;
   }
 
   if (erro) {
@@ -137,7 +138,7 @@ function PecaView() {
     return (
       <section className="flex flex-col gap-4">
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-          Nao foi possivel montar os detalhes da peca.
+          Não foi possível montar os detalhes da peça.
         </div>
 
         <div>
@@ -156,10 +157,10 @@ function PecaView() {
     <section className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Detalhes da peca</h1>
+          <h1 className="text-xl font-semibold text-white">Detalhes da peça</h1>
 
           <p className="text-sm text-slate-300">
-            Consulte as informacoes completas da peca.
+            Consulte as informações completas da peça.
           </p>
         </div>
 
@@ -174,7 +175,7 @@ function PecaView() {
       <div className="w-full max-w-4xl rounded-xl border border-slate-300 bg-white p-6 shadow-md">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
-            <p className="text-sm text-slate-500">Codigo</p>
+            <p className="text-sm text-slate-500">Código</p>
             <p className="font-medium text-slate-900">{peca.codigo}</p>
           </div>
 
@@ -184,7 +185,7 @@ function PecaView() {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Descricao</p>
+            <p className="text-sm text-slate-500">Descrição</p>
             <p className="font-medium text-slate-900">{peca.descricao}</p>
           </div>
 
@@ -194,7 +195,7 @@ function PecaView() {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Tratamento Termico</p>
+            <p className="text-sm text-slate-500">Tratamento Térmico</p>
             <p className="font-medium text-slate-900">
               {normalizeTratamentoTermicoValue(peca.tratamentoTermico) || "-"}
             </p>
@@ -209,14 +210,14 @@ function PecaView() {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Terceirizacao</p>
+            <p className="text-sm text-slate-500">Terceirização</p>
             <p className="font-medium text-slate-900">
               {normalizeTerceirizacaoValue(peca.terceirizacao) || "-"}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Observacao</p>
+            <p className="text-sm text-slate-500">Observação</p>
             <p className="font-medium text-slate-900">
               {peca.observacao ?? "-"}
             </p>

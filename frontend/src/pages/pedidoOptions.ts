@@ -1,7 +1,7 @@
 export const pedidoStatusOptions = [
   { value: "ABERTO", label: "Aberto" },
   { value: "EM_ANDAMENTO", label: "Em andamento" },
-  { value: "CONCLUIDO", label: "Concluido" },
+  { value: "CONCLUIDO", label: "Concluído" },
   { value: "CANCELADO", label: "Cancelado" },
 ] as const;
 

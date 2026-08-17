@@ -8,6 +8,7 @@ import {
   tratamentoSuperficialOptions,
   tratamentoTermicoOptions,
 } from "./pecaOptions";
+import { apiFetch } from "../services/api";
 
 type Cliente = {
   id: number;
@@ -69,7 +70,7 @@ function PecaEditForm() {
   useEffect(() => {
     async function carregarDados() {
       if (!id) {
-        setErroCarregamento("ID da peca nao informado.");
+        setErroCarregamento("ID da peça não informado.");
         setCarregandoDados(false);
         return;
       }
@@ -79,21 +80,21 @@ function PecaEditForm() {
 
       try {
         const [responseClientes, responsePeca] = await Promise.all([
-          fetch("http://localhost:3001/clientes"),
-          fetch(`http://localhost:3001/pecas/${id}`),
+          apiFetch("/clientes"),
+          apiFetch(`/pecas/${id}`),
         ]);
 
         if (!responsePeca.ok) {
           throw new Error(
             await getResponseErrorMessage(
               responsePeca,
-              "Nao foi possivel carregar a peca.",
+              "Não foi possível carregar a peça.",
             ),
           );
         }
 
         if (!responseClientes.ok) {
-          throw new Error("Nao foi possivel carregar os clientes da peca.");
+          throw new Error("Não foi possível carregar os clientes da peça.");
         }
 
         const [clientesApi, pecaApi] = await Promise.all([
@@ -121,7 +122,7 @@ function PecaEditForm() {
       } catch (error) {
         console.error(error);
         setErroCarregamento(
-          error instanceof Error ? error.message : "Nao foi possivel carregar a peca.",
+          error instanceof Error ? error.message : "Não foi possível carregar a peça.",
         );
       } finally {
         setCarregandoDados(false);
@@ -136,7 +137,7 @@ function PecaEditForm() {
     setErroSubmit("");
 
     if (!id) {
-      setErroSubmit("ID da peca nao informado.");
+      setErroSubmit("ID da peça não informado.");
       return;
     }
 
@@ -147,22 +148,22 @@ function PecaEditForm() {
     const clienteIdNormalizado = Number(clienteId);
 
     if (codigoNormalizado === "") {
-      setErroSubmit("Informe o codigo da peca.");
+      setErroSubmit("Informe o código da peça.");
       return;
     }
 
     if (!Number.isInteger(clienteIdNormalizado) || clienteIdNormalizado <= 0) {
-      setErroSubmit("Selecione um cliente valido.");
+      setErroSubmit("Selecione um cliente válido.");
       return;
     }
 
     if (descricaoNormalizada === "") {
-      setErroSubmit("Informe a descricao da peca.");
+      setErroSubmit("Informe a descrição da peça.");
       return;
     }
 
     if (materialNormalizado === "") {
-      setErroSubmit("Informe o material da peca.");
+      setErroSubmit("Informe o material da peça.");
       return;
     }
 
@@ -180,7 +181,7 @@ function PecaEditForm() {
     setSalvando(true);
 
     try {
-      const response = await fetch(`http://localhost:3001/pecas/${id}`, {
+      const response = await apiFetch(`/pecas/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -189,15 +190,15 @@ function PecaEditForm() {
       });
 
       if (!response.ok) {
-        let fallbackMessage = "Nao foi possivel atualizar a peca agora.";
+        let fallbackMessage = "Não foi possível atualizar a peça agora.";
 
         if (response.status === 404) {
-          fallbackMessage = "Peca ou cliente nao encontrados.";
+          fallbackMessage = "Peça ou cliente não encontrados.";
         }
 
         if (response.status === 409) {
           fallbackMessage =
-            "Ja existe uma peca com esse codigo para o cliente informado.";
+            "Já existe uma peça com esse código para o cliente informado.";
         }
 
         const message = await getResponseErrorMessage(response, fallbackMessage);
@@ -208,20 +209,20 @@ function PecaEditForm() {
       navigate("/pecas");
     } catch (error) {
       console.error(error);
-      setErroSubmit("Nao foi possivel conectar com a API para atualizar a peca.");
+      setErroSubmit("Não foi possível conectar com a API para atualizar a peça.");
     } finally {
       setSalvando(false);
     }
   }
 
   if (carregandoDados) {
-    return <p className="text-sm text-slate-200">Carregando peca...</p>;
+    return <p className="text-sm text-slate-200">Carregando peça...</p>;
   }
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-white">Editar Peca</h1>
+        <h1 className="text-xl font-semibold text-white">Editar Peça</h1>
 
         <p className="text-sm text-slate-300">Edite os campos desejados.</p>
       </div>
@@ -248,7 +249,7 @@ function PecaEditForm() {
               htmlFor="codigo"
               className="text-sm font-medium text-slate-700"
             >
-              Codigo
+              Código
             </label>
 
             <input
@@ -257,7 +258,7 @@ function PecaEditForm() {
               type="text"
               value={codigo}
               onChange={(event) => setCodigo(event.target.value)}
-              placeholder="Digite o codigo da peca..."
+              placeholder="Digite o código da peça..."
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -296,7 +297,7 @@ function PecaEditForm() {
             htmlFor="descricao"
             className="text-sm font-medium text-slate-700"
           >
-            Descricao
+            Descrição
           </label>
 
           <input
@@ -305,7 +306,7 @@ function PecaEditForm() {
             type="text"
             value={descricao}
             onChange={(event) => setDescricao(event.target.value)}
-            placeholder="Digite a descricao da peca..."
+            placeholder="Digite a descrição da peça..."
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
         </div>
@@ -335,7 +336,7 @@ function PecaEditForm() {
               htmlFor="tratamentoTermico"
               className="text-sm font-medium text-slate-700"
             >
-              Tratamento Termico
+              Tratamento Térmico
             </label>
 
             <select
@@ -385,7 +386,7 @@ function PecaEditForm() {
               htmlFor="terceirizacao"
               className="text-sm font-medium text-slate-700"
             >
-              Terceirizacao
+              Terceirização
             </label>
 
             <select
@@ -395,7 +396,7 @@ function PecaEditForm() {
               onChange={(event) => setTerceirizacao(event.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             >
-              <option value="">Sem terceirizacao</option>
+              <option value="">Sem terceirização</option>
 
               {terceirizacaoOptions.map((opcao) => (
                 <option key={opcao} value={opcao}>
@@ -411,14 +412,14 @@ function PecaEditForm() {
             htmlFor="observacao"
             className="text-sm font-medium text-slate-700"
           >
-            Observacao
+            Observação
           </label>
 
           <textarea
             id="observacao"
             name="observacao"
             rows={4}
-            placeholder="Digite as observacoes..."
+            placeholder="Digite as observações..."
             value={observacao}
             onChange={(event) => setObservacao(event.target.value)}
             className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
@@ -439,7 +440,7 @@ function PecaEditForm() {
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            title="Salvar alteracoes"
+            title="Salvar alterações"
             disabled={salvando || !!erroCarregamento}
           >
             {salvando ? "Salvando..." : "Salvar"}

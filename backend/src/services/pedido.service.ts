@@ -38,7 +38,7 @@ function hasOwnKey(value: Record<string, unknown>, key: string) {
 
 function ensureObjectPayload(
   value: unknown,
-  message = "Dados do pedido invalidos",
+  message = "Dados do pedido inválidos",
 ): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new PedidoValidationError(message);
@@ -47,13 +47,13 @@ function ensureObjectPayload(
 
 function normalizeRequiredString(value: unknown, fieldName: string) {
   if (typeof value !== "string") {
-    throw new PedidoValidationError(`${fieldName} e obrigatorio`);
+    throw new PedidoValidationError(`${fieldName} é obrigatório`);
   }
 
   const normalizedValue = value.trim();
 
   if (normalizedValue === "") {
-    throw new PedidoValidationError(`${fieldName} e obrigatorio`);
+    throw new PedidoValidationError(`${fieldName} é obrigatório`);
   }
 
   return normalizedValue;
@@ -65,7 +65,7 @@ function normalizeOptionalString(value: unknown, fieldName: string) {
   }
 
   if (typeof value !== "string") {
-    throw new PedidoValidationError(`${fieldName} invalida`);
+    throw new PedidoValidationError(`${fieldName} inválida`);
   }
 
   const normalizedValue = value.trim();
@@ -84,7 +84,7 @@ function requirePositiveInteger(value: unknown, fieldName: string) {
 
 function parseStatus(value: unknown) {
   if (typeof value !== "string" || !statusValues.has(value as StatusPedido)) {
-    throw new PedidoValidationError("Status do pedido invalido");
+    throw new PedidoValidationError("Status do pedido inválido");
   }
 
   return value as StatusPedido;
@@ -94,7 +94,7 @@ async function ensureClienteExists(clienteId: number) {
   const cliente = await clienteRepository.findById(clienteId);
 
   if (!cliente) {
-    throw new PedidoNotFoundError("Cliente nao encontrado");
+    throw new PedidoNotFoundError("Cliente não encontrado");
   }
 }
 
@@ -105,7 +105,7 @@ async function buildFinalState(
   const codigoSource = hasOwnKey(payload, "codigo") ? payload.codigo : current?.codigo;
 
   if (codigoSource === undefined) {
-    throw new PedidoValidationError("Codigo e obrigatorio");
+    throw new PedidoValidationError("Código é obrigatório");
   }
 
   const clienteIdSource = hasOwnKey(payload, "clienteId")
@@ -113,7 +113,7 @@ async function buildFinalState(
     : current?.clienteId;
 
   if (clienteIdSource === undefined) {
-    throw new PedidoValidationError("clienteId e obrigatorio");
+    throw new PedidoValidationError("clienteId é obrigatório");
   }
 
   const clienteId = requirePositiveInteger(clienteIdSource, "clienteId");
@@ -124,10 +124,10 @@ async function buildFinalState(
     : (current?.status ?? StatusPedido.ABERTO);
 
   return {
-    codigo: normalizeRequiredString(codigoSource, "Codigo"),
+    codigo: normalizeRequiredString(codigoSource, "Código"),
     clienteId,
     observacao: hasOwnKey(payload, "observacao")
-      ? normalizeOptionalString(payload.observacao, "Observacao")
+      ? normalizeOptionalString(payload.observacao, "Observação")
       : (current?.observacao ?? null),
     status,
   };
@@ -149,7 +149,7 @@ export const pedidoService = {
     const pedido = await pedidoRepository.findById(id);
 
     if (!pedido) {
-      throw new PedidoNotFoundError("Pedido nao encontrado");
+      throw new PedidoNotFoundError("Pedido não encontrado");
     }
 
     return pedido;
