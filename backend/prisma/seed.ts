@@ -10,12 +10,12 @@ async function main() {
   await prisma.cliente.deleteMany();
   await prisma.user.deleteMany();
 
-  const senhaHash = await bcrypt.hash("12345678", 10);
+  const senhaHash = await bcrypt.hash("Demo@12345", 10);
 
   await prisma.user.create({
     data: {
-      nome: "Marcus",
-      email: "marcus@email.com",
+      nome: "Usuário Demo",
+      email: "demo@controleproducao.com",
       senha: senhaHash,
     },
   });
@@ -456,8 +456,8 @@ async function main() {
   }
 
   console.log("Seed concluído com sucesso.");
-  console.log("Login: marcus@email.com");
-  console.log("Senha: 12345678");
+  console.log("Login demo: demo@controleproducao.com");
+  console.log("Senha demo: Demo@12345");
 }
 
 main()
